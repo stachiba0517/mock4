@@ -195,67 +195,68 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <header className="app-header">
-        <div className="header-content">
-          <h1>🚀 CRM システム</h1>
-          <p>営業支援プラットフォーム</p>
+            <header className="app-header">
+        <div className="header-container">
+          <div className="header-brand">
+            <h1>CRM システム</h1>
           </div>
-        <nav className="main-nav">
-        <button
-            className={`nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-            📊 ダッシュボード
-          </button>
-          <button 
-            className={`nav-btn ${activeTab === 'customers' ? 'active' : ''}`}
-            onClick={() => setActiveTab('customers')}
-          >
-            👥 顧客管理
-          </button>
-          <button 
-            className={`nav-btn ${activeTab === 'opportunities' ? 'active' : ''}`}
-            onClick={() => setActiveTab('opportunities')}
-          >
-            🎯 営業案件
-          </button>
-          <button 
-            className={`nav-btn ${activeTab === 'communications' ? 'active' : ''}`}
-            onClick={() => setActiveTab('communications')}
-          >
-            💬 履歴管理
-          </button>
-          <button 
-            className={`nav-btn ${activeTab === 'tasks' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tasks')}
-          >
-            📅 タスク管理
-          </button>
-          <button 
-            className={`nav-btn ${activeTab === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analytics')}
-          >
-            📈 売上分析
-        </button>
-        <button
-            className={`nav-btn ${activeTab === 'marketing' ? 'active' : ''}`}
-            onClick={() => setActiveTab('marketing')}
-        >
-            🚀 マーケティング
-        </button>
-        <button
-            className={`nav-btn ${activeTab === 'documents' ? 'active' : ''}`}
-            onClick={() => setActiveTab('documents')}
-        >
-            📄 文書作成
-        </button>
-        <button
-            className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
-          onClick={() => setActiveTab('reports')}
-        >
-            📊 レポート
-        </button>
-      </nav>
+          <nav className="main-nav">
+            <button 
+              className={`nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setActiveTab('dashboard')}
+            >
+              ダッシュボード
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'customers' ? 'active' : ''}`}
+              onClick={() => setActiveTab('customers')}
+            >
+              顧客管理
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'opportunities' ? 'active' : ''}`}
+              onClick={() => setActiveTab('opportunities')}
+            >
+              営業案件
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'communications' ? 'active' : ''}`}
+              onClick={() => setActiveTab('communications')}
+            >
+              履歴管理
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'tasks' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tasks')}
+            >
+              タスク管理
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+              onClick={() => setActiveTab('analytics')}
+            >
+              売上分析
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'marketing' ? 'active' : ''}`}
+              onClick={() => setActiveTab('marketing')}
+            >
+              マーケティング
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'documents' ? 'active' : ''}`}
+              onClick={() => setActiveTab('documents')}
+            >
+              文書作成
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reports')}
+            >
+              レポート
+            </button>
+          </nav>
+        </div>
       </header>
 
       <main className="main-content">
