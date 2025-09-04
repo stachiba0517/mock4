@@ -148,6 +148,21 @@ const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({
+    companyName: '',
+    contactName: '',
+    position: '',
+    email: '',
+    phone: '',
+    address: '',
+    industry: '',
+    companySize: '',
+    revenue: 0,
+    status: '見込み客',
+    assignedSales: '',
+    notes: ''
+  });
 
   // データ読み込み
   useEffect(() => {
@@ -183,6 +198,57 @@ const App: React.FC = () => {
 
     loadData();
   }, []);
+
+  // 顧客追加ハンドラー
+  const handleAddCustomer = () => {
+    if (!newCustomer.companyName || !newCustomer.contactName || !newCustomer.email) {
+      alert('必須項目を入力してください。');
+      return;
+    }
+
+    const customer: Customer = {
+      id: Math.max(...customers.map(c => c.id), 0) + 1,
+      companyName: newCustomer.companyName || '',
+      contactName: newCustomer.contactName || '',
+      position: newCustomer.position || '',
+      email: newCustomer.email || '',
+      phone: newCustomer.phone || '',
+      address: newCustomer.address || '',
+      industry: newCustomer.industry || '',
+      companySize: newCustomer.companySize || '',
+      revenue: newCustomer.revenue || 0,
+      status: newCustomer.status || '見込み客',
+      assignedSales: newCustomer.assignedSales || '',
+      createdDate: new Date().toISOString().split('T')[0],
+      lastContact: new Date().toISOString().split('T')[0],
+      notes: newCustomer.notes || ''
+    };
+
+    setCustomers([...customers, customer]);
+    setShowCustomerModal(false);
+    setNewCustomer({
+      companyName: '',
+      contactName: '',
+      position: '',
+      email: '',
+      phone: '',
+      address: '',
+      industry: '',
+      companySize: '',
+      revenue: 0,
+      status: '見込み客',
+      assignedSales: '',
+      notes: ''
+    });
+  };
+
+  // 入力値更新ハンドラー
+  const handleInputChange = (field: keyof Customer, value: string | number) => {
+    setNewCustomer(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   if (loading) {
     return (
@@ -370,7 +436,7 @@ const App: React.FC = () => {
           <div className="customer-management">
             <div className="section-header">
               <h2>👥 顧客データベース管理</h2>
-              <button className="btn-primary">+ 新規顧客追加</button>
+              <button className="btn-primary" onClick={() => setShowCustomerModal(true)}>+ 新規顧客追加</button>
             </div>
             
             <div className="filters">
@@ -569,6 +635,169 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* 新規顧客追加モーダル */}
+      {showCustomerModal && (
+        <div className="modal-overlay" onClick={() => setShowCustomerModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>新規顧客追加</h3>
+              <button className="modal-close" onClick={() => setShowCustomerModal(false)}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>会社名 <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    value={newCustomer.companyName || ''}
+                    onChange={(e) => handleInputChange('companyName', e.target.value)}
+                    placeholder="株式会社サンプル"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>担当者名 <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    value={newCustomer.contactName || ''}
+                    onChange={(e) => handleInputChange('contactName', e.target.value)}
+                    placeholder="田中 太郎"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>役職</label>
+                  <input
+                    type="text"
+                    value={newCustomer.position || ''}
+                    onChange={(e) => handleInputChange('position', e.target.value)}
+                    placeholder="営業部長"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>メールアドレス <span className="required">*</span></label>
+                  <input
+                    type="email"
+                    value={newCustomer.email || ''}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="tanaka@sample.co.jp"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>電話番号</label>
+                  <input
+                    type="tel"
+                    value={newCustomer.phone || ''}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="03-1234-5678"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>住所</label>
+                  <input
+                    type="text"
+                    value={newCustomer.address || ''}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    placeholder="東京都渋谷区..."
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>業界</label>
+                  <select
+                    value={newCustomer.industry || ''}
+                    onChange={(e) => handleInputChange('industry', e.target.value)}
+                  >
+                    <option value="">業界を選択</option>
+                    <option value="IT・ソフトウェア">IT・ソフトウェア</option>
+                    <option value="製造業">製造業</option>
+                    <option value="金融・保険">金融・保険</option>
+                    <option value="商社・貿易">商社・貿易</option>
+                    <option value="デザイン・広告">デザイン・広告</option>
+                    <option value="建設・不動産">建設・不動産</option>
+                    <option value="医療・福祉">医療・福祉</option>
+                    <option value="教育">教育</option>
+                    <option value="その他">その他</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>企業規模</label>
+                  <select
+                    value={newCustomer.companySize || ''}
+                    onChange={(e) => handleInputChange('companySize', e.target.value)}
+                  >
+                    <option value="">企業規模を選択</option>
+                    <option value="小規模（50名未満）">小規模（50名未満）</option>
+                    <option value="中規模（100-500名）">中規模（100-500名）</option>
+                    <option value="大規模（500名以上）">大規模（500名以上）</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>年間売上（円）</label>
+                  <input
+                    type="number"
+                    value={newCustomer.revenue || 0}
+                    onChange={(e) => handleInputChange('revenue', parseInt(e.target.value) || 0)}
+                    placeholder="50000000"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>ステータス</label>
+                  <select
+                    value={newCustomer.status || '見込み客'}
+                    onChange={(e) => handleInputChange('status', e.target.value)}
+                  >
+                    <option value="見込み客">見込み客</option>
+                    <option value="アクティブ">アクティブ</option>
+                    <option value="契約済み">契約済み</option>
+                    <option value="フォローアップ中">フォローアップ中</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>担当営業</label>
+                  <select
+                    value={newCustomer.assignedSales || ''}
+                    onChange={(e) => handleInputChange('assignedSales', e.target.value)}
+                  >
+                    <option value="">担当営業を選択</option>
+                    <option value="佐藤 花子">佐藤 花子</option>
+                    <option value="鈴木 一郎">鈴木 一郎</option>
+                    <option value="田村 正樹">田村 正樹</option>
+                  </select>
+                </div>
+                
+                <div className="form-group full-width">
+                  <label>備考</label>
+                  <textarea
+                    value={newCustomer.notes || ''}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="顧客に関する特記事項..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowCustomerModal(false)}>
+                キャンセル
+              </button>
+              <button className="btn-primary" onClick={handleAddCustomer}>
+                顧客を追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="app-footer">
         <p>&copy; 2024 CRM システム - 営業支援プラットフォーム</p>
