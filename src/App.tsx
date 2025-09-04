@@ -149,6 +149,7 @@ const App: React.FC = () => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({
     companyName: '',
     contactName: '',
@@ -162,6 +163,20 @@ const App: React.FC = () => {
     status: '見込み客',
     assignedSales: '',
     notes: ''
+  });
+  const [newOpportunity, setNewOpportunity] = useState<Partial<SalesOpportunity>>({
+    title: '',
+    customerId: 0,
+    customerName: '',
+    stage: '初回商談',
+    probability: 30,
+    value: 0,
+    expectedCloseDate: '',
+    assignedSales: '',
+    description: '',
+    nextAction: '',
+    competitorInfo: '',
+    decisionMakers: []
   });
 
   // データ読み込み
@@ -242,9 +257,66 @@ const App: React.FC = () => {
     });
   };
 
-  // 入力値更新ハンドラー
+  // 顧客入力値更新ハンドラー
   const handleInputChange = (field: keyof Customer, value: string | number) => {
     setNewCustomer(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 営業案件追加ハンドラー
+  const handleAddOpportunity = () => {
+    if (!newOpportunity.title || !newOpportunity.customerId || !newOpportunity.value) {
+      alert('必須項目を入力してください。');
+      return;
+    }
+
+    const selectedCustomer = customers.find(c => c.id === newOpportunity.customerId);
+    if (!selectedCustomer) {
+      alert('有効な顧客を選択してください。');
+      return;
+    }
+
+    const opportunity: SalesOpportunity = {
+      id: Math.max(...opportunities.map(o => o.id), 0) + 1,
+      title: newOpportunity.title || '',
+      customerId: newOpportunity.customerId || 0,
+      customerName: selectedCustomer.companyName,
+      stage: newOpportunity.stage || '初回商談',
+      probability: newOpportunity.probability || 30,
+      value: newOpportunity.value || 0,
+      expectedCloseDate: newOpportunity.expectedCloseDate || '',
+      assignedSales: newOpportunity.assignedSales || '',
+      createdDate: new Date().toISOString().split('T')[0],
+      lastActivity: new Date().toISOString().split('T')[0],
+      description: newOpportunity.description || '',
+      nextAction: newOpportunity.nextAction || '',
+      competitorInfo: newOpportunity.competitorInfo || '',
+      decisionMakers: newOpportunity.decisionMakers || []
+    };
+
+    setOpportunities([...opportunities, opportunity]);
+    setShowOpportunityModal(false);
+    setNewOpportunity({
+      title: '',
+      customerId: 0,
+      customerName: '',
+      stage: '初回商談',
+      probability: 30,
+      value: 0,
+      expectedCloseDate: '',
+      assignedSales: '',
+      description: '',
+      nextAction: '',
+      competitorInfo: '',
+      decisionMakers: []
+    });
+  };
+
+  // 営業案件入力値更新ハンドラー
+  const handleOpportunityInputChange = (field: keyof SalesOpportunity, value: string | number | string[]) => {
+    setNewOpportunity(prev => ({
       ...prev,
       [field]: value
     }));
@@ -499,12 +571,12 @@ const App: React.FC = () => {
             </div>
         )}
 
-        {activeTab === 'opportunities' && (
+                {activeTab === 'opportunities' && (
           <div className="sales-opportunities">
             <div className="section-header">
               <h2>🎯 営業プロセス・案件管理</h2>
-              <button className="btn-primary">+ 新規案件追加</button>
-              </div>
+              <button className="btn-primary" onClick={() => setShowOpportunityModal(true)}>+ 新規案件追加</button>
+            </div>
 
             <div className="opportunities-kanban">
               {analytics && analytics.pipelineAnalysis.stageDistribution.map((stage, stageIndex) => (
@@ -793,6 +865,153 @@ const App: React.FC = () => {
               </button>
               <button className="btn-primary" onClick={handleAddCustomer}>
                 顧客を追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 新規営業案件追加モーダル */}
+      {showOpportunityModal && (
+        <div className="modal-overlay" onClick={() => setShowOpportunityModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>新規営業案件追加</h3>
+              <button className="modal-close" onClick={() => setShowOpportunityModal(false)}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>案件名 <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    value={newOpportunity.title || ''}
+                    onChange={(e) => handleOpportunityInputChange('title', e.target.value)}
+                    placeholder="CRMシステム導入プロジェクト"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>顧客 <span className="required">*</span></label>
+                  <select
+                    value={newOpportunity.customerId || 0}
+                    onChange={(e) => handleOpportunityInputChange('customerId', parseInt(e.target.value))}
+                  >
+                    <option value={0}>顧客を選択</option>
+                    {customers.map(customer => (
+                      <option key={customer.id} value={customer.id}>
+                        {customer.companyName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>営業ステージ</label>
+                  <select
+                    value={newOpportunity.stage || '初回商談'}
+                    onChange={(e) => handleOpportunityInputChange('stage', e.target.value)}
+                  >
+                    <option value="初回商談">初回商談</option>
+                    <option value="ニーズ確認">ニーズ確認</option>
+                    <option value="技術検証">技術検証</option>
+                    <option value="提案書作成">提案書作成</option>
+                    <option value="契約交渉">契約交渉</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>受注確度（%）</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={newOpportunity.probability || 30}
+                    onChange={(e) => handleOpportunityInputChange('probability', parseInt(e.target.value) || 0)}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>案件金額（円） <span className="required">*</span></label>
+                  <input
+                    type="number"
+                    value={newOpportunity.value || 0}
+                    onChange={(e) => handleOpportunityInputChange('value', parseInt(e.target.value) || 0)}
+                    placeholder="5000000"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>予定クローズ日</label>
+                  <input
+                    type="date"
+                    value={newOpportunity.expectedCloseDate || ''}
+                    onChange={(e) => handleOpportunityInputChange('expectedCloseDate', e.target.value)}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>担当営業</label>
+                  <select
+                    value={newOpportunity.assignedSales || ''}
+                    onChange={(e) => handleOpportunityInputChange('assignedSales', e.target.value)}
+                  >
+                    <option value="">担当営業を選択</option>
+                    <option value="佐藤 花子">佐藤 花子</option>
+                    <option value="鈴木 一郎">鈴木 一郎</option>
+                    <option value="田村 正樹">田村 正樹</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>次のアクション</label>
+                  <input
+                    type="text"
+                    value={newOpportunity.nextAction || ''}
+                    onChange={(e) => handleOpportunityInputChange('nextAction', e.target.value)}
+                    placeholder="提案書作成"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>競合情報</label>
+                  <input
+                    type="text"
+                    value={newOpportunity.competitorInfo || ''}
+                    onChange={(e) => handleOpportunityInputChange('competitorInfo', e.target.value)}
+                    placeholder="Salesforce検討中"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>決裁者（カンマ区切り）</label>
+                  <input
+                    type="text"
+                    value={newOpportunity.decisionMakers?.join(', ') || ''}
+                    onChange={(e) => handleOpportunityInputChange('decisionMakers', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
+                    placeholder="田中 太郎, 営業部副部長 鈴木氏"
+                  />
+                </div>
+                
+                <div className="form-group full-width">
+                  <label>案件詳細</label>
+                  <textarea
+                    value={newOpportunity.description || ''}
+                    onChange={(e) => handleOpportunityInputChange('description', e.target.value)}
+                    placeholder="営業チーム向けCRMシステムの導入。50ユーザーライセンス。"
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowOpportunityModal(false)}>
+                キャンセル
+              </button>
+              <button className="btn-primary" onClick={handleAddOpportunity}>
+                案件を追加
               </button>
             </div>
           </div>
