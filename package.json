@@ -1,7 +1,7 @@
 {
-  "name": "manufacturing-inventory-system",
+  "name": "crm-system",
   "version": "1.0.0",
-  "description": "製造業向け在庫管理システム - AWS Amplify",
+  "description": "顧客関係管理システム (CRM) - 営業支援プラットフォーム",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",

@@ -1,681 +1,584 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// モックデータ
-const mockInventoryData = [
-  { id: 'INV001', name: 'スチール板材 5mm', category: '原材料', stock: 45, minStock: 20, price: 15000, location: '第1倉庫-A-01', status: 'normal' },
-  { id: 'INV002', name: 'ボルト M8x50', category: '部品', stock: 8, minStock: 10, price: 80, location: '第2倉庫-B-03', status: 'low' },
-  { id: 'INV003', name: 'アルミニウム角材', category: '原材料', stock: 12, minStock: 15, price: 2500, location: '第1倉庫-A-05', status: 'low' },
-  { id: 'INV004', name: '電動ドリル替刃', category: '工具', stock: 25, minStock: 10, price: 1200, location: '第3倉庫-C-02', status: 'normal' },
-  { id: 'INV005', name: '完成品 モーターケース', category: '完成品', stock: 0, minStock: 25, price: 8500, location: '完成品倉庫-F-01', status: 'out' },
-  { id: 'INV006', name: '切削油 20L', category: '消耗品', stock: 18, minStock: 12, price: 3200, location: '化学品倉庫-D-01', status: 'normal' }
-];
+// データ型定義
+interface Customer {
+  id: number;
+  companyName: string;
+  contactName: string;
+  position: string;
+  email: string;
+  phone: string;
+  address: string;
+  industry: string;
+  companySize: string;
+  revenue: number;
+  status: string;
+  assignedSales: string;
+  createdDate: string;
+  lastContact: string;
+  notes: string;
+}
 
-const mockTransactionData = [
-  { id: 'TXN001', itemId: 'INV001', itemName: 'スチール板材 5mm', type: '入庫', quantity: 20, unitPrice: 15000, total: 300000, date: '2025-01-15', time: '10:30', operator: '田中太郎', reference: 'PO-2025-001', reason: '定期発注' },
-  { id: 'TXN002', itemId: 'INV002', itemName: 'ボルト M8x50', type: '出庫', quantity: -15, unitPrice: 80, total: -1200, date: '2025-01-14', time: '16:45', operator: '佐藤花子', reference: 'WO-2025-005', reason: '製品A100製造' },
-  { id: 'TXN003', itemId: 'INV003', itemName: 'アルミニウム角材', type: '調整', quantity: -3, unitPrice: 2500, total: -7500, date: '2025-01-13', time: '11:20', operator: '山田次郎', reference: 'ADJ-2025-001', reason: '棚卸調整' },
-  { id: 'TXN004', itemId: 'INV005', itemName: '完成品 モーターケース', type: '入庫', quantity: 10, unitPrice: 8500, total: 85000, date: '2025-01-12', time: '14:00', operator: '鈴木一郎', reference: 'WO-2025-003', reason: '製造完成' },
-  { id: 'TXN005', itemId: 'INV004', itemName: '電動ドリル替刃', type: '出庫', quantity: -5, unitPrice: 1200, total: -6000, date: '2025-01-11', time: '09:15', operator: '伊藤美咲', reference: 'SO-2025-012', reason: '顧客出荷' },
-  { id: 'TXN006', itemId: 'INV006', itemName: '切削油 20L', type: '入庫', quantity: 8, unitPrice: 3200, total: 25600, date: '2025-01-10', time: '15:30', operator: '高橋健太', reference: 'PO-2025-002', reason: '補充発注' },
-  { id: 'TXN007', itemId: 'INV001', itemName: 'スチール板材 5mm', type: '出庫', quantity: -12, unitPrice: 15000, total: -180000, date: '2025-01-09', time: '08:45', operator: '渡辺真由', reference: 'WO-2025-001', reason: '大型製品製造' },
-  { id: 'TXN008', itemId: 'INV002', itemName: 'ボルト M8x50', type: '入庫', quantity: 100, unitPrice: 80, total: 8000, date: '2025-01-08', time: '13:15', operator: '中村雅子', reference: 'PO-2025-003', reason: '月次補充' },
-];
+interface SalesOpportunity {
+  id: number;
+  title: string;
+  customerId: number;
+  customerName: string;
+  stage: string;
+  probability: number;
+  value: number;
+  expectedCloseDate: string;
+  assignedSales: string;
+  createdDate: string;
+  lastActivity: string;
+  description: string;
+  nextAction: string;
+  competitorInfo: string;
+  decisionMakers: string[];
+}
 
-const mockReportData = {
-  abcAnalysis: [
-    { category: 'A', items: 23, percentage: 15.6, value: 1715000, description: '高価値・高回転' },
-    { category: 'B', items: 47, percentage: 32.0, value: 588000, description: '中価値・中回転' },
-    { category: 'C', items: 77, percentage: 52.4, value: 147000, description: '低価値・低回転' }
-  ],
-  turnoverRate: [
-    { period: '2024年12月', rate: 2.8, target: 3.0, status: 'below' },
-    { period: '2024年11月', rate: 3.2, target: 3.0, status: 'above' },
-    { period: '2024年10月', rate: 2.9, target: 3.0, status: 'below' },
-    { period: '2024年09月', rate: 3.4, target: 3.0, status: 'above' },
-    { period: '2024年08月', rate: 3.1, target: 3.0, status: 'above' },
-    { period: '2024年07月', rate: 2.7, target: 3.0, status: 'below' }
-  ],
-  stockLevel: [
-    { category: '原材料', current: 68, optimal: 75, percentage: 90.7 },
-    { category: '部品', current: 42, optimal: 50, percentage: 84.0 },
-    { category: '完成品', current: 23, optimal: 30, percentage: 76.7 },
-    { category: '工具', current: 8, optimal: 10, percentage: 80.0 },
-    { category: '消耗品', current: 6, optimal: 8, percentage: 75.0 }
-  ]
-};
+interface Communication {
+  id: number;
+  customerId: number;
+  customerName: string;
+  type: string;
+  date: string;
+  time: string;
+  duration: number | null;
+  subject: string;
+  summary: string;
+  participants: string[];
+  nextAction: string;
+  priority: string;
+}
 
-const mockStats = {
-  totalItems: 147,
-  totalValue: 2450000,
-  lowStockItems: 12,
-  outOfStockItems: 3,
-  recentTransactions: 28
-};
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  customerId: number | null;
+  customerName: string | null;
+  assignedTo: string;
+  priority: string;
+  status: string;
+  dueDate: string;
+  createdDate: string;
+  completedDate: string | null;
+  type: string;
+  relatedOpportunityId: number | null;
+}
 
-type ActiveTab = 'dashboard' | 'inventory' | 'transactions' | 'reports';
-
-function App() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [transactionFilter, setTransactionFilter] = useState('all');
-  const [reportType, setReportType] = useState('abc');
-
-  const getStockStatusClass = (status: string) => {
-    switch (status) {
-      case 'low': return 'status-low';
-      case 'out': return 'status-out';
-      case 'normal': return 'status-normal';
-      default: return 'status-normal';
-    }
+interface Analytics {
+  salesForecast: {
+    currentMonth: {
+      target: number;
+      achieved: number;
+      progress: number;
+      remaining: number;
+    };
+    quarterlyForecast: Array<{
+      month: string;
+      target: number;
+      achieved: number;
+      forecast: number;
+    }>;
   };
-
-  const getStockStatusLabel = (status: string) => {
-    switch (status) {
-      case 'low': return '低在庫';
-      case 'out': return '在庫切れ';
-      case 'normal': return '正常';
-      default: return '正常';
-    }
+  pipelineAnalysis: {
+    totalValue: number;
+    weightedValue: number;
+    averageDealSize: number;
+    conversionRate: number;
+    salesCycle: number;
+    stageDistribution: Array<{
+      stage: string;
+      count: number;
+      value: number;
+      probability: number;
+    }>;
   };
-
-  const filteredItems = mockInventoryData.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredTransactions = mockTransactionData.filter(transaction => {
-    if (transactionFilter === 'all') return true;
-    return transaction.type === transactionFilter;
-  });
-
-  const getTransactionTypeClass = (type: string) => {
-    switch (type) {
-      case '入庫': return 'tx-in';
-      case '出庫': return 'tx-out';
-      case '調整': return 'tx-adjust';
-      default: return 'tx-other';
-    }
+  salesPerformance: {
+    totalRevenue: number;
+    salesTeam: Array<{
+      name: string;
+      target: number;
+      achieved: number;
+      progress: number;
+      deals: number;
+      avgDealSize: number;
+    }>;
   };
+  customerAnalysis: {
+    totalCustomers: number;
+    activeCustomers: number;
+    newCustomersThisMonth: number;
+    customerRetentionRate: number;
+    industryDistribution: Array<{
+      industry: string;
+      count: number;
+      percentage: number;
+    }>;
+    companySizeDistribution: Array<{
+      size: string;
+      count: number;
+      percentage: number;
+    }>;
+  };
+  activityMetrics: {
+    totalCalls: number;
+    totalEmails: number;
+    totalMeetings: number;
+    totalVisits: number;
+    averageResponseTime: number;
+    monthlyActivity: Array<{
+      month: string;
+      calls: number;
+      emails: number;
+      meetings: number;
+      visits: number;
+    }>;
+  };
+}
+
+const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [opportunities, setOpportunities] = useState<SalesOpportunity[]>([]);
+  const [communications, setCommunications] = useState<Communication[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // データ読み込み
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [customersRes, opportunitiesRes, communicationsRes, tasksRes, analyticsRes] = await Promise.all([
+          fetch('/api/customers.json'),
+          fetch('/api/sales-opportunities.json'),
+          fetch('/api/communications.json'),
+          fetch('/api/tasks.json'),
+          fetch('/api/analytics.json')
+        ]);
+
+        const [customersData, opportunitiesData, communicationsData, tasksData, analyticsData] = await Promise.all([
+          customersRes.json(),
+          opportunitiesRes.json(),
+          communicationsRes.json(),
+          tasksRes.json(),
+          analyticsRes.json()
+        ]);
+
+        setCustomers(customersData);
+        setOpportunities(opportunitiesData);
+        setCommunications(communicationsData);
+        setTasks(tasksData);
+        setAnalytics(analyticsData);
+        setLoading(false);
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner"></div>
+        <p>CRMシステムを読み込み中...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
       <header className="app-header">
         <div className="header-content">
-          <div className="logo-section">
-            <h1>🏭 製造業在庫管理システム</h1>
-            <p>Manufacturing Inventory Management System</p>
+          <h1>🚀 CRM システム</h1>
+          <p>営業支援プラットフォーム</p>
           </div>
-          <div className="header-stats">
-            <div className="stat-item">
-              <span className="stat-value">{new Date().toLocaleDateString('ja-JP')}</span>
-              <span className="stat-label">最終更新</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value sync-status">✅ 同期済み</span>
-              <span className="stat-label">システム状態</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <nav className="app-nav">
+        <nav className="main-nav">
         <button
-          className={`nav-button ${activeTab === 'dashboard' ? 'active' : ''}`}
+            className={`nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('dashboard')}
         >
-          <span className="nav-icon">📊</span>
-          <span className="nav-text">ダッシュボード</span>
+            📊 ダッシュボード
+          </button>
+          <button 
+            className={`nav-btn ${activeTab === 'customers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('customers')}
+          >
+            👥 顧客管理
+          </button>
+          <button 
+            className={`nav-btn ${activeTab === 'opportunities' ? 'active' : ''}`}
+            onClick={() => setActiveTab('opportunities')}
+          >
+            🎯 営業案件
+          </button>
+          <button 
+            className={`nav-btn ${activeTab === 'communications' ? 'active' : ''}`}
+            onClick={() => setActiveTab('communications')}
+          >
+            💬 履歴管理
+          </button>
+          <button 
+            className={`nav-btn ${activeTab === 'tasks' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tasks')}
+          >
+            📅 タスク管理
+          </button>
+          <button 
+            className={`nav-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analytics')}
+          >
+            📈 売上分析
         </button>
         <button
-          className={`nav-button ${activeTab === 'inventory' ? 'active' : ''}`}
-          onClick={() => setActiveTab('inventory')}
+            className={`nav-btn ${activeTab === 'marketing' ? 'active' : ''}`}
+            onClick={() => setActiveTab('marketing')}
         >
-          <span className="nav-icon">📦</span>
-          <span className="nav-text">在庫一覧</span>
+            🚀 マーケティング
         </button>
         <button
-          className={`nav-button ${activeTab === 'transactions' ? 'active' : ''}`}
-          onClick={() => setActiveTab('transactions')}
+            className={`nav-btn ${activeTab === 'documents' ? 'active' : ''}`}
+            onClick={() => setActiveTab('documents')}
         >
-          <span className="nav-icon">📋</span>
-          <span className="nav-text">取引履歴</span>
+            📄 文書作成
         </button>
         <button
-          className={`nav-button ${activeTab === 'reports' ? 'active' : ''}`}
+            className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
           onClick={() => setActiveTab('reports')}
         >
-          <span className="nav-icon">📈</span>
-          <span className="nav-text">レポート</span>
+            📊 レポート
         </button>
       </nav>
+      </header>
 
-      <main className="app-main">
+      <main className="main-content">
         {activeTab === 'dashboard' && (
           <div className="dashboard">
             <div className="dashboard-header">
-              <h2>ダッシュボード</h2>
-              <button className="refresh-btn">🔄 更新</button>
+              <h2>📊 CRMダッシュボード</h2>
+              <p>営業活動の全体像を把握できます</p>
             </div>
 
-            <div className="stats-grid">
-              <div className="stat-card total-items">
-                <div className="stat-icon">📦</div>
-                <div className="stat-content">
-                  <h3>総在庫アイテム数</h3>
-                  <div className="stat-value">{mockStats.totalItems}</div>
-                  <div className="stat-unit">アイテム</div>
+            {analytics && (
+              <div className="dashboard-grid">
+                <div className="kpi-cards">
+                  <div className="kpi-card">
+                    <h3>今月の売上目標</h3>
+                    <div className="kpi-value">¥{analytics.salesForecast.currentMonth.target.toLocaleString()}</div>
+                    <div className="kpi-progress">
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{width: `${analytics.salesForecast.currentMonth.progress}%`}}></div>
+                      </div>
+                      <span>{analytics.salesForecast.currentMonth.progress}% 達成</span>
                 </div>
               </div>
-              <div className="stat-card total-value">
-                <div className="stat-icon">💰</div>
-                <div className="stat-content">
-                  <h3>総在庫価額</h3>
-                  <div className="stat-value">¥{mockStats.totalValue.toLocaleString()}</div>
-                  <div className="stat-unit">現在価値</div>
+                  
+                  <div className="kpi-card">
+                    <h3>パイプライン総額</h3>
+                    <div className="kpi-value">¥{analytics.pipelineAnalysis.totalValue.toLocaleString()}</div>
+                    <div className="kpi-sub">加重値: ¥{analytics.pipelineAnalysis.weightedValue.toLocaleString()}</div>
+                </div>
+                  
+                  <div className="kpi-card">
+                    <h3>アクティブ顧客</h3>
+                    <div className="kpi-value">{analytics.customerAnalysis.activeCustomers}</div>
+                    <div className="kpi-sub">総顧客数: {analytics.customerAnalysis.totalCustomers}</div>
+              </div>
+                  
+                  <div className="kpi-card">
+                    <h3>今月のタスク</h3>
+                    <div className="kpi-value">{tasks.filter(t => t.status !== '完了').length}</div>
+                    <div className="kpi-sub">完了: {tasks.filter(t => t.status === '完了').length}件</div>
                 </div>
               </div>
-              <div className="stat-card low-stock">
-                <div className="stat-icon">⚠️</div>
-                <div className="stat-content">
-                  <h3>低在庫アイテム</h3>
-                  <div className="stat-value">{mockStats.lowStockItems}</div>
-                  <div className="stat-unit">要補充</div>
-                </div>
-              </div>
-              <div className="stat-card out-stock">
-                <div className="stat-icon">🚨</div>
-                <div className="stat-content">
-                  <h3>在庫切れ</h3>
-                  <div className="stat-value">{mockStats.outOfStockItems}</div>
-                  <div className="stat-unit">緊急補充</div>
-                </div>
-              </div>
-            </div>
 
-            <div className="alerts-section">
-              <h3>🚨 在庫アラート</h3>
-              <div className="alerts-list">
-                <div className="alert-item critical">
-                  <span className="alert-icon">🚨</span>
-                  <span className="alert-text">完成品 モーターケース が在庫切れです</span>
-                  <span className="alert-time">2分前</span>
+                <div className="pipeline-section">
+                  <h3>🎯 営業パイプライン</h3>
+                  <div className="pipeline-stages">
+                    {analytics.pipelineAnalysis.stageDistribution.map((stage, index) => (
+                      <div key={index} className="pipeline-stage">
+                        <div className="stage-header">
+                          <h4>{stage.stage}</h4>
+                          <span className="stage-count">{stage.count}件</span>
+                        </div>
+                        <div className="stage-value">¥{stage.value.toLocaleString()}</div>
+                        <div className="stage-probability">{stage.probability}% 確度</div>
                 </div>
-                <div className="alert-item warning">
-                  <span className="alert-icon">⚠️</span>
-                  <span className="alert-text">ボルト M8x50 の在庫が少なくなっています (8個 / 最低10個)</span>
-                  <span className="alert-time">15分前</span>
-                </div>
-                <div className="alert-item warning">
-                  <span className="alert-icon">⚠️</span>
-                  <span className="alert-text">アルミニウム角材 の在庫が少なくなっています (12本 / 最低15本)</span>
-                  <span className="alert-time">1時間前</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'inventory' && (
-          <div className="inventory">
-            <div className="inventory-header">
-              <h2>在庫一覧</h2>
-              <div className="inventory-controls">
-                <input
-                  type="text"
-                  placeholder="商品名またはSKUで検索..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
-                />
-                <button className="add-btn">➕ 新規追加</button>
+                    ))}
               </div>
             </div>
 
-            <div className="inventory-grid">
-              {filteredItems.map((item) => (
-                <div key={item.id} className="inventory-card">
-                  <div className="card-header">
-                    <h3>{item.name}</h3>
-                    <span className={`status-badge ${getStockStatusClass(item.status)}`}>
-                      {getStockStatusLabel(item.status)}
-                    </span>
+                <div className="team-performance">
+                  <h3>👥 営業チーム実績</h3>
+                  <div className="performance-list">
+                    {analytics.salesPerformance.salesTeam.map((member, index) => (
+                      <div key={index} className="performance-item">
+                        <div className="member-info">
+                          <h4>{member.name}</h4>
+                          <div className="member-stats">
+                            <span>目標: ¥{member.target.toLocaleString()}</span>
+                            <span>実績: ¥{member.achieved.toLocaleString()}</span>
+                            <span>達成率: {member.progress}%</span>
+                </div>
+                </div>
+                        <div className="member-progress">
+                          <div className="progress-bar">
+                            <div className="progress-fill" style={{width: `${member.progress}%`}}></div>
+                </div>
+              </div>
+            </div>
+                    ))}
+              </div>
+            </div>
+
+                <div className="recent-activities">
+                  <h3>📝 最近の活動</h3>
+                  <div className="activity-list">
+                    {communications.slice(0, 5).map((comm, index) => (
+                      <div key={index} className="activity-item">
+                        <div className="activity-icon">
+                          {comm.type === '電話' && '📞'}
+                          {comm.type === 'メール' && '📧'}
+                          {comm.type === '会議' && '🤝'}
+                          {comm.type === '訪問' && '🏢'}
                   </div>
-                  <div className="card-content">
-                    <div className="info-row">
-                      <span className="label">SKU:</span>
-                      <span className="value">{item.id}</span>
+                        <div className="activity-content">
+                          <h4>{comm.subject}</h4>
+                          <p>{comm.customerName} - {comm.date}</p>
                     </div>
-                    <div className="info-row">
-                      <span className="label">カテゴリ:</span>
-                      <span className="value">{item.category}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">現在在庫:</span>
-                      <span className="value">{item.stock} 個</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">最低在庫:</span>
-                      <span className="value">{item.minStock} 個</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">単価:</span>
-                      <span className="value">¥{item.price.toLocaleString()}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">保管場所:</span>
-                      <span className="value">{item.location}</span>
-                    </div>
-                  </div>
-                  <div className="card-actions">
-                    <button className="btn-edit">✏️ 編集</button>
-                    <button className="btn-history">📊 履歴</button>
+                        <div className={`priority-badge priority-${comm.priority}`}>
+                          {comm.priority}
                   </div>
                 </div>
               ))}
             </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {activeTab === 'transactions' && (
-          <div className="transactions">
-            <div className="transactions-header">
-              <h2>取引履歴</h2>
-              <div className="transaction-controls">
-                <select
-                  value={transactionFilter}
-                  onChange={(e) => setTransactionFilter(e.target.value)}
-                  className="filter-select"
-                >
-                  <option value="all">全ての取引</option>
-                  <option value="入庫">入庫</option>
-                  <option value="出庫">出庫</option>
-                  <option value="調整">調整</option>
+        {activeTab === 'customers' && (
+          <div className="customer-management">
+            <div className="section-header">
+              <h2>👥 顧客データベース管理</h2>
+              <button className="btn-primary">+ 新規顧客追加</button>
+            </div>
+            
+            <div className="filters">
+              <input type="text" placeholder="顧客名で検索..." className="search-input" />
+              <select className="filter-select">
+                <option>全てのステータス</option>
+                <option>アクティブ</option>
+                <option>見込み客</option>
+                <option>契約済み</option>
+                <option>フォローアップ中</option>
                 </select>
-                <button className="export-btn">📊 エクスポート</button>
-              </div>
             </div>
 
-            <div className="transactions-summary">
-              <div className="summary-card">
-                <span className="summary-label">今月の取引数</span>
-                <span className="summary-value">{filteredTransactions.length}</span>
+            <div className="customer-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>会社名</th>
+                    <th>担当者</th>
+                    <th>業界</th>
+                    <th>ステータス</th>
+                    <th>担当営業</th>
+                    <th>最終コンタクト</th>
+                    <th>アクション</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {customers.map((customer) => (
+                    <tr key={customer.id}>
+                      <td>
+                        <div className="company-info">
+                          <h4>{customer.companyName}</h4>
+                          <p>{customer.companySize}</p>
               </div>
-              <div className="summary-card">
-                <span className="summary-label">入庫取引</span>
-                <span className="summary-value">{mockTransactionData.filter(t => t.type === '入庫').length}</span>
+                      </td>
+                      <td>
+                        <div className="contact-info">
+                          <h4>{customer.contactName}</h4>
+                          <p>{customer.position}</p>
+                          <p>{customer.email}</p>
               </div>
-              <div className="summary-card">
-                <span className="summary-label">出庫取引</span>
-                <span className="summary-value">{mockTransactionData.filter(t => t.type === '出庫').length}</span>
+                      </td>
+                      <td>{customer.industry}</td>
+                      <td>
+                        <span className={`status-badge status-${customer.status.replace(/\s+/g, '-')}`}>
+                          {customer.status}
+                        </span>
+                      </td>
+                      <td>{customer.assignedSales}</td>
+                      <td>{customer.lastContact}</td>
+                      <td>
+                        <button className="btn-small">編集</button>
+                        <button className="btn-small btn-secondary">履歴</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               </div>
             </div>
+        )}
 
-            <div className="transactions-table">
-              <div className="table-header">
-                <div className="col-date">日時</div>
-                <div className="col-type">種別</div>
-                <div className="col-item">アイテム</div>
-                <div className="col-quantity">数量</div>
-                <div className="col-total">金額</div>
-                <div className="col-operator">担当者</div>
-                <div className="col-reason">理由</div>
+        {activeTab === 'opportunities' && (
+          <div className="sales-opportunities">
+            <div className="section-header">
+              <h2>🎯 営業プロセス・案件管理</h2>
+              <button className="btn-primary">+ 新規案件追加</button>
               </div>
-              {filteredTransactions.map((transaction) => (
-                <div key={transaction.id} className="table-row">
-                  <div className="col-date">
-                    <div className="date">{transaction.date}</div>
-                    <div className="time">{transaction.time}</div>
+
+            <div className="opportunities-kanban">
+              {analytics && analytics.pipelineAnalysis.stageDistribution.map((stage, stageIndex) => (
+                <div key={stageIndex} className="kanban-column">
+                  <div className="column-header">
+                    <h3>{stage.stage}</h3>
+                    <span className="stage-count">{stage.count}件 (¥{stage.value.toLocaleString()})</span>
                   </div>
-                  <div className="col-type">
-                    <span className={`type-badge ${getTransactionTypeClass(transaction.type)}`}>
-                      {transaction.type}
-                    </span>
+                  <div className="opportunity-cards">
+                    {opportunities
+                      .filter(opp => opp.stage === stage.stage)
+                      .map((opportunity) => (
+                        <div key={opportunity.id} className="opportunity-card">
+                          <h4>{opportunity.title}</h4>
+                          <p className="customer-name">{opportunity.customerName}</p>
+                          <div className="opportunity-value">¥{opportunity.value.toLocaleString()}</div>
+                          <div className="opportunity-meta">
+                            <div className="probability">確度: {opportunity.probability}%</div>
+                            <div className="close-date">予定: {opportunity.expectedCloseDate}</div>
                   </div>
-                  <div className="col-item">
-                    <div className="item-name">{transaction.itemName}</div>
-                    <div className="item-id">{transaction.itemId}</div>
+                          <div className="assigned-sales">担当: {opportunity.assignedSales}</div>
+                          <div className="next-action">
+                            <strong>次のアクション:</strong> {opportunity.nextAction}
                   </div>
-                  <div className="col-quantity">
-                    <span className={transaction.quantity > 0 ? 'qty-positive' : 'qty-negative'}>
-                      {transaction.quantity > 0 ? '+' : ''}{transaction.quantity}
-                    </span>
                   </div>
-                  <div className="col-total">
-                    <span className={transaction.total > 0 ? 'amount-positive' : 'amount-negative'}>
-                      ¥{Math.abs(transaction.total).toLocaleString()}
-                    </span>
+                      ))}
                   </div>
-                  <div className="col-operator">{transaction.operator}</div>
-                  <div className="col-reason">{transaction.reason}</div>
                 </div>
               ))}
             </div>
           </div>
         )}
+
+        {/* その他のタブは簡略版で表示 */}
+        {activeTab === 'communications' && (
+          <div className="communication-history">
+            <h2>💬 コミュニケーション履歴管理</h2>
+            <p>顧客との全ての接触履歴を時系列で管理します。</p>
+            <div className="feature-placeholder">
+              <h3>主な機能:</h3>
+              <ul>
+                <li>電話、メール、会議、訪問の記録</li>
+                <li>時系列での履歴表示</li>
+                <li>次のアクション設定</li>
+                <li>優先度管理</li>
+              </ul>
+              </div>
+            </div>
+        )}
+
+        {activeTab === 'tasks' && (
+          <div className="task-schedule">
+            <h2>📅 タスク・スケジュール管理</h2>
+            <p>営業活動に関するタスクを効率的に管理します。</p>
+            <div className="feature-placeholder">
+              <h3>主な機能:</h3>
+              <ul>
+                <li>フォローアップタスク管理</li>
+                <li>アポイントメント管理</li>
+                <li>締切管理</li>
+                <li>優先度別表示</li>
+              </ul>
+                </div>
+              </div>
+            )}
+
+        {activeTab === 'analytics' && (
+          <div className="sales-analytics">
+            <h2>📈 売上予測・分析機能</h2>
+            <p>過去のデータから売上予測を立て、営業実績を分析します。</p>
+            <div className="feature-placeholder">
+              <h3>主な機能:</h3>
+              <ul>
+                <li>売上予測レポート</li>
+                <li>営業実績分析</li>
+                <li>KPI管理</li>
+                <li>トレンド分析</li>
+              </ul>
+                              </div>
+                            </div>
+        )}
+
+        {activeTab === 'marketing' && (
+          <div className="marketing-automation">
+            <h2>🚀 マーケティングオートメーション</h2>
+            <p>メール配信、キャンペーン管理、リードナーチャリングを自動化します。</p>
+            <div className="feature-placeholder">
+              <h3>主な機能:</h3>
+              <ul>
+                <li>メールキャンペーン管理</li>
+                <li>リードナーチャリング</li>
+                <li>スコアリング機能</li>
+                <li>自動化ワークフロー</li>
+              </ul>
+                </div>
+              </div>
+            )}
+
+        {activeTab === 'documents' && (
+          <div className="document-generator">
+            <h2>📄 見積書・提案書作成</h2>
+            <p>顧客データと連動した見積書や提案書を効率的に作成・管理します。</p>
+            <div className="feature-placeholder">
+              <h3>主な機能:</h3>
+              <ul>
+                <li>テンプレート管理</li>
+                <li>自動データ連携</li>
+                <li>承認フロー</li>
+                <li>PDF出力</li>
+              </ul>
+                </div>
+              </div>
+            )}
 
         {activeTab === 'reports' && (
-          <div className="reports">
-            <div className="reports-header">
-              <h2>分析レポート</h2>
-              <div className="report-controls">
-                <select
-                  value={reportType}
-                  onChange={(e) => setReportType(e.target.value)}
-                  className="filter-select"
-                >
-                  <option value="abc">ABC分析</option>
-                  <option value="turnover">在庫回転率</option>
-                  <option value="level">在庫レベル分析</option>
-                </select>
-                <button className="generate-btn">📈 レポート生成</button>
-              </div>
+          <div className="reports-dashboard">
+            <h2>📊 レポート・ダッシュボード</h2>
+            <p>営業実績、顧客分析、活動状況を視覚的に表示します。</p>
+            <div className="feature-placeholder">
+              <h3>主な機能:</h3>
+              <ul>
+                <li>営業実績レポート</li>
+                <li>顧客分析ダッシュボード</li>
+                <li>活動状況レポート</li>
+                <li>カスタムレポート作成</li>
+              </ul>
             </div>
-
-            {reportType === 'abc' && (
-              <div className="report-section">
-                <h3>📊 ABC分析 (パレート図)</h3>
-                <p className="report-description">
-                  在庫価値の80-20ルールを視覚化し、重要アイテムの特定を支援します
-                </p>
-                <div className="pareto-chart-container">
-                  <div className="pareto-chart">
-                    <svg viewBox="0 0 600 400" className="pareto-svg">
-                      {/* Background and grid */}
-                      <defs>
-                        <linearGradient id="classAGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#e53e3e" />
-                          <stop offset="100%" stopColor="#c53030" />
-                        </linearGradient>
-                        <linearGradient id="classBGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#dd6b20" />
-                          <stop offset="100%" stopColor="#c05621" />
-                        </linearGradient>
-                        <linearGradient id="classCGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#38a169" />
-                          <stop offset="100%" stopColor="#2f855a" />
-                        </linearGradient>
-                      </defs>
-                      
-                      {/* Y-axis for values */}
-                      <line x1="80" y1="50" x2="80" y2="320" stroke="#2c3e50" strokeWidth="2"/>
-                      {/* X-axis */}
-                      <line x1="80" y1="320" x2="520" y2="320" stroke="#2c3e50" strokeWidth="2"/>
-                      {/* Y-axis for percentage (right) */}
-                      <line x1="520" y1="50" x2="520" y2="320" stroke="#3498db" strokeWidth="2"/>
-                      
-                      {/* Grid lines */}
-                      <line x1="80" y1="266" x2="520" y2="266" stroke="#e1e8ed" strokeWidth="1" strokeDasharray="3,3"/>
-                      <line x1="80" y1="212" x2="520" y2="212" stroke="#e1e8ed" strokeWidth="1" strokeDasharray="3,3"/>
-                      <line x1="80" y1="158" x2="520" y2="158" stroke="#e1e8ed" strokeWidth="1" strokeDasharray="3,3"/>
-                      <line x1="80" y1="104" x2="520" y2="104" stroke="#e1e8ed" strokeWidth="1" strokeDasharray="3,3"/>
-                      
-                      {/* 80% line */}
-                      <line x1="80" y1="104" x2="520" y2="104" stroke="#e74c3c" strokeWidth="2" strokeDasharray="5,5"/>
-                      <text x="530" y="108" fontSize="12" fill="#e74c3c" fontWeight="600">80%</text>
-                      
-                      {/* Bars */}
-                      {/* Class A */}
-                      <rect x="120" y="187" width="100" height="133" fill="url(#classAGradient)" className="pareto-bar"/>
-                      {/* Class B */}
-                      <rect x="250" y="236" width="100" height="84" fill="url(#classBGradient)" className="pareto-bar"/>
-                      {/* Class C */}
-                      <rect x="380" y="294" width="100" height="26" fill="url(#classCGradient)" className="pareto-bar"/>
-                      
-                      {/* Cumulative line */}
-                      <path 
-                        d="M 170 187 L 300 131 L 430 104" 
-                        fill="none" 
-                        stroke="#3498db" 
-                        strokeWidth="3"
-                        className="cumulative-line"
-                      />
-                      
-                      {/* Data points on cumulative line */}
-                      <circle cx="170" cy="187" r="6" fill="#3498db" stroke="white" strokeWidth="2" className="data-point"/>
-                      <circle cx="300" cy="131" r="6" fill="#3498db" stroke="white" strokeWidth="2" className="data-point"/>
-                      <circle cx="430" cy="104" r="6" fill="#3498db" stroke="white" strokeWidth="2" className="data-point"/>
-                      
-                      {/* Labels */}
-                      <text x="170" y="340" textAnchor="middle" fontSize="14" fontWeight="600" fill="#2c3e50">クラス A</text>
-                      <text x="300" y="340" textAnchor="middle" fontSize="14" fontWeight="600" fill="#2c3e50">クラス B</text>
-                      <text x="430" y="340" textAnchor="middle" fontSize="14" fontWeight="600" fill="#2c3e50">クラス C</text>
-                      
-                      {/* Y-axis labels (left - value) */}
-                      <text x="70" y="325" textAnchor="end" fontSize="12" fill="#2c3e50">0</text>
-                      <text x="70" y="266" textAnchor="end" fontSize="12" fill="#2c3e50">500K</text>
-                      <text x="70" y="212" textAnchor="end" fontSize="12" fill="#2c3e50">1M</text>
-                      <text x="70" y="158" textAnchor="end" fontSize="12" fill="#2c3e50">1.5M</text>
-                      <text x="70" y="104" textAnchor="end" fontSize="12" fill="#2c3e50">2M</text>
-                      
-                      {/* Y-axis labels (right - percentage) */}
-                      <text x="530" y="325" fontSize="12" fill="#3498db">0%</text>
-                      <text x="530" y="266" fontSize="12" fill="#3498db">20%</text>
-                      <text x="530" y="212" fontSize="12" fill="#3498db">40%</text>
-                      <text x="530" y="158" fontSize="12" fill="#3498db">60%</text>
-                      <text x="530" y="54" fontSize="12" fill="#3498db">100%</text>
-                      
-                      {/* Value labels on bars */}
-                      <text x="170" y="180" textAnchor="middle" fontSize="12" fontWeight="700" fill="white">¥1.7M</text>
-                      <text x="300" y="229" textAnchor="middle" fontSize="12" fontWeight="700" fill="white">¥588K</text>
-                      <text x="430" y="287" textAnchor="middle" fontSize="12" fontWeight="700" fill="white">¥147K</text>
-                      
-                      {/* Percentage labels on line */}
-                      <text x="175" y="182" fontSize="11" fontWeight="600" fill="#3498db">70.1%</text>
-                      <text x="305" y="126" fontSize="11" fontWeight="600" fill="#3498db">94.1%</text>
-                      <text x="435" y="99" fontSize="11" fontWeight="600" fill="#3498db">100%</text>
-                      
-                      {/* Axis titles */}
-                      <text x="300" y="370" textAnchor="middle" fontSize="14" fontWeight="600" fill="#2c3e50">分類</text>
-                      <text x="40" y="185" textAnchor="middle" fontSize="14" fontWeight="600" fill="#2c3e50" transform="rotate(-90 40 185)">在庫価値 (¥)</text>
-                      <text x="560" y="185" textAnchor="middle" fontSize="14" fontWeight="600" fill="#3498db" transform="rotate(90 560 185)">累積割合 (%)</text>
-                    </svg>
-                  </div>
-                  
-                  <div className="pareto-legend">
-                    <div className="pareto-summary">
-                      <h4>🎯 80-20ルール分析</h4>
-                      <p>クラスA (15.6%のアイテム) が全体価値の70.1%を占める</p>
-                    </div>
-                    
-                    <div className="pareto-details">
-                      {mockReportData.abcAnalysis.map((item, index) => {
-                        const cumulative = index === 0 ? 70.1 : index === 1 ? 94.1 : 100;
-                        return (
-                          <div key={item.category} className={`pareto-item abc-${item.category.toLowerCase()}`}>
-                            <div className="pareto-color"></div>
-                            <div className="pareto-content">
-                              <div className="pareto-header">
-                                <span className="pareto-label">クラス {item.category}</span>
-                                <span className="pareto-cumulative">{cumulative}%</span>
-                              </div>
-                              <div className="pareto-stats">
-                                <span>{item.items} アイテム ({item.percentage}%)</span>
-                                <span>¥{item.value.toLocaleString()}</span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {reportType === 'turnover' && (
-              <div className="report-section">
-                <h3>🔄 在庫回転率分析</h3>
-                <p className="report-description">
-                  月別の在庫回転率を表示し、在庫効率の改善点を特定します
-                </p>
-                <div className="bar-chart-container">
-                  <div className="chart-header">
-                    <div className="chart-title">在庫回転率推移</div>
-                    <div className="chart-target">目標: 3.0回転/月</div>
-                  </div>
-                  
-                  <div className="bar-chart">
-                    <div className="chart-y-axis">
-                      <div className="y-label">4.0</div>
-                      <div className="y-label">3.5</div>
-                      <div className="y-label">3.0</div>
-                      <div className="y-label">2.5</div>
-                      <div className="y-label">2.0</div>
-                      <div className="y-label">1.5</div>
-                    </div>
-                    
-                    <div className="chart-content">
-                      <div className="chart-grid">
-                        <div className="grid-line" data-value="4.0"></div>
-                        <div className="grid-line" data-value="3.5"></div>
-                        <div className="grid-line target-line" data-value="3.0"></div>
-                        <div className="grid-line" data-value="2.5"></div>
-                        <div className="grid-line" data-value="2.0"></div>
-                        <div className="grid-line" data-value="1.5"></div>
-                      </div>
-                      
-                      <div className="chart-bars">
-                        {mockReportData.turnoverRate.map((item, index) => (
-                          <div key={index} className="bar-group">
-                            <div className="bar-container">
-                              <div 
-                                className={`chart-bar ${item.status}`}
-                                style={{ height: `${((item.rate - 1.5) / 2.5) * 250}px` }}
-                                title={`${item.period}: ${item.rate}回転`}
-                              >
-                                <span className="bar-value">{item.rate}</span>
-                              </div>
-                            </div>
-                            <div className="bar-label">{item.period.replace('2024年', '').replace('月', '月')}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="chart-legend">
-                    <div className="legend-item">
-                      <div className="legend-color above"></div>
-                      <span>目標達成</span>
-                    </div>
-                    <div className="legend-item">
-                      <div className="legend-color below"></div>
-                      <span>要改善</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {reportType === 'level' && (
-              <div className="report-section">
-                <h3>📈 在庫レベル分析</h3>
-                <p className="report-description">
-                  カテゴリ別の在庫レベルを分析し、最適在庫との比較を表示します
-                </p>
-                <div className="radar-chart-container">
-                  <div className="radar-chart">
-                    <svg viewBox="0 0 400 400" className="radar-svg">
-                      {/* Background gradient */}
-                      <defs>
-                        <linearGradient id="dataPolygonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="rgba(52, 152, 219, 0.3)" />
-                          <stop offset="100%" stopColor="rgba(52, 152, 219, 0.1)" />
-                        </linearGradient>
-                      </defs>
-                      
-                      {/* Concentric circles with percentage labels */}
-                      <circle cx="200" cy="200" r="160" fill="none" stroke="#e1e8ed" strokeWidth="2"/>
-                      <circle cx="200" cy="200" r="128" fill="none" stroke="#e1e8ed" strokeWidth="1"/>
-                      <circle cx="200" cy="200" r="96" fill="none" stroke="#e1e8ed" strokeWidth="1"/>
-                      <circle cx="200" cy="200" r="64" fill="none" stroke="#e1e8ed" strokeWidth="1"/>
-                      <circle cx="200" cy="200" r="32" fill="none" stroke="#e1e8ed" strokeWidth="1"/>
-                      
-                      {/* Radial lines for 5 categories */}
-                      <line x1="200" y1="40" x2="200" y2="360" stroke="#e1e8ed" strokeWidth="1"/>
-                      <line x1="200" y1="200" x2="351" y2="113" stroke="#e1e8ed" strokeWidth="1"/>
-                      <line x1="200" y1="200" x2="351" y2="287" stroke="#e1e8ed" strokeWidth="1"/>
-                      <line x1="200" y1="200" x2="49" y2="287" stroke="#e1e8ed" strokeWidth="1"/>
-                      <line x1="200" y1="200" x2="49" y2="113" stroke="#e1e8ed" strokeWidth="1"/>
-                      
-                      {/* Data polygon */}
-                      <polygon
-                        points="200,55 306,108 306,292 94,292 94,108"
-                        fill="url(#dataPolygonGradient)"
-                        stroke="#3498db"
-                        strokeWidth="3"
-                      />
-                      
-                      {/* Data points */}
-                      {mockReportData.stockLevel.map((item, index) => {
-                        const angles = [0, 72, 144, 216, 288]; // 5 points, 72 degrees apart
-                        const angle = (angles[index] - 90) * (Math.PI / 180); // Convert to radians and adjust for top start
-                        const radius = (item.percentage / 100) * 160; // Scale to chart size
-                        const x = 200 + radius * Math.cos(angle);
-                        const y = 200 + radius * Math.sin(angle);
-                        
-                        return (
-                          <circle
-                            key={index}
-                            cx={x}
-                            cy={y}
-                            r="6"
-                            fill={item.percentage < 80 ? '#e74c3c' : item.percentage > 95 ? '#f39c12' : '#27ae60'}
-                            stroke="white"
-                            strokeWidth="2"
-                            className="radar-point"
-                          />
-                        );
-                      })}
-                      
-                      {/* Labels */}
-                      <text x="200" y="30" textAnchor="middle" fontSize="12" fontWeight="600" fill="#2c3e50">原材料</text>
-                      <text x="351" y="118" textAnchor="start" fontSize="12" fontWeight="600" fill="#2c3e50">部品</text>
-                      <text x="351" y="297" textAnchor="start" fontSize="12" fontWeight="600" fill="#2c3e50">完成品</text>
-                      <text x="49" y="297" textAnchor="end" fontSize="12" fontWeight="600" fill="#2c3e50">消耗品</text>
-                      <text x="49" y="118" textAnchor="end" fontSize="12" fontWeight="600" fill="#2c3e50">工具</text>
-                      
-                      {/* Percentage labels */}
-                      <text x="210" y="45" fontSize="10" fill="#7f8c8d">100%</text>
-                      <text x="210" y="77" fontSize="10" fill="#7f8c8d">80%</text>
-                      <text x="210" y="109" fontSize="10" fill="#7f8c8d">60%</text>
-                      <text x="210" y="141" fontSize="10" fill="#7f8c8d">40%</text>
-                      <text x="210" y="173" fontSize="10" fill="#7f8c8d">20%</text>
-                    </svg>
-                  </div>
-                  
-                  <div className="radar-legend">
-                    {mockReportData.stockLevel.map((item, index) => (
-                      <div key={index} className="radar-legend-item">
-                        <div 
-                          className="radar-legend-color"
-                          style={{ 
-                            backgroundColor: item.percentage < 80 ? '#e74c3c' : item.percentage > 95 ? '#f39c12' : '#27ae60'
-                          }}
-                        ></div>
-                        <div className="radar-legend-content">
-                          <div className="radar-legend-label">{item.category}</div>
-                          <div className="radar-legend-value">{item.percentage}%</div>
-                          <div className="radar-legend-details">
-                            {item.current}/{item.optimal}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>
 
       <footer className="app-footer">
-        <p>© 2025 製造業向け在庫管理システム - AWS Amplify Hosting</p>
+        <p>&copy; 2024 CRM システム - 営業支援プラットフォーム</p>
+        <div className="footer-links">
+          <span>📱 モバイル対応</span>
+          <span>🔗 外部システム連携</span>
+          <span>🔒 セキュア</span>
+        </div>
       </footer>
     </div>
   );
-}
+};
 
 export default App;

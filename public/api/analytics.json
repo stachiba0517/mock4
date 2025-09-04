@@ -1,0 +1,178 @@
+{
+  "salesForecast": {
+    "currentMonth": {
+      "target": 20000000,
+      "achieved": 15000000,
+      "progress": 75,
+      "remaining": 5000000
+    },
+    "quarterlyForecast": [
+      {
+        "month": "1月",
+        "target": 18000000,
+        "achieved": 19500000,
+        "forecast": 19500000
+      },
+      {
+        "month": "2月",
+        "target": 20000000,
+        "achieved": 17800000,
+        "forecast": 17800000
+      },
+      {
+        "month": "3月",
+        "target": 22000000,
+        "achieved": 15000000,
+        "forecast": 21000000
+      }
+    ]
+  },
+  "pipelineAnalysis": {
+    "totalValue": 36500000,
+    "weightedValue": 19550000,
+    "averageDealSize": 7300000,
+    "conversionRate": 0.68,
+    "salesCycle": 45,
+    "stageDistribution": [
+      {
+        "stage": "初回商談",
+        "count": 1,
+        "value": 1500000,
+        "probability": 30
+      },
+      {
+        "stage": "ニーズ確認",
+        "count": 1,
+        "value": 12000000,
+        "probability": 40
+      },
+      {
+        "stage": "技術検証",
+        "count": 1,
+        "value": 15000000,
+        "probability": 60
+      },
+      {
+        "stage": "提案書作成",
+        "count": 1,
+        "value": 5000000,
+        "probability": 75
+      },
+      {
+        "stage": "契約交渉",
+        "count": 1,
+        "value": 3000000,
+        "probability": 85
+      }
+    ]
+  },
+  "salesPerformance": {
+    "totalRevenue": 52300000,
+    "salesTeam": [
+      {
+        "name": "佐藤 花子",
+        "target": 25000000,
+        "achieved": 22500000,
+        "progress": 90,
+        "deals": 8,
+        "avgDealSize": 2812500
+      },
+      {
+        "name": "鈴木 一郎",
+        "target": 30000000,
+        "achieved": 21800000,
+        "progress": 73,
+        "deals": 6,
+        "avgDealSize": 3633333
+      },
+      {
+        "name": "田村 正樹",
+        "target": 20000000,
+        "achieved": 18000000,
+        "progress": 90,
+        "deals": 5,
+        "avgDealSize": 3600000
+      }
+    ]
+  },
+  "customerAnalysis": {
+    "totalCustomers": 5,
+    "activeCustomers": 3,
+    "newCustomersThisMonth": 1,
+    "customerRetentionRate": 0.95,
+    "industryDistribution": [
+      {
+        "industry": "IT・ソフトウェア",
+        "count": 1,
+        "percentage": 20
+      },
+      {
+        "industry": "商社・貿易",
+        "count": 1,
+        "percentage": 20
+      },
+      {
+        "industry": "デザイン・広告",
+        "count": 1,
+        "percentage": 20
+      },
+      {
+        "industry": "製造業",
+        "count": 1,
+        "percentage": 20
+      },
+      {
+        "industry": "金融・保険",
+        "count": 1,
+        "percentage": 20
+      }
+    ],
+    "companySizeDistribution": [
+      {
+        "size": "小規模（50名未満）",
+        "count": 1,
+        "percentage": 20
+      },
+      {
+        "size": "中規模（100-500名）",
+        "count": 2,
+        "percentage": 40
+      },
+      {
+        "size": "大規模（500名以上）",
+        "count": 2,
+        "percentage": 40
+      }
+    ]
+  },
+  "activityMetrics": {
+    "totalCalls": 45,
+    "totalEmails": 128,
+    "totalMeetings": 23,
+    "totalVisits": 12,
+    "averageResponseTime": 4.2,
+    "monthlyActivity": [
+      {
+        "month": "1月",
+        "calls": 18,
+        "emails": 52,
+        "meetings": 9,
+        "visits": 4
+      },
+      {
+        "month": "2月",
+        "calls": 15,
+        "emails": 41,
+        "meetings": 7,
+        "visits": 5
+      },
+      {
+        "month": "3月",
+        "calls": 12,
+        "emails": 35,
+        "meetings": 7,
+        "visits": 3
+      }
+    ]
+  }
+}
