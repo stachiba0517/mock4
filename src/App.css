@@ -342,8 +342,10 @@ body {
 }
 
 .activity-list {
-  display: grid;
+  display: flex;
   gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
 }
 
 .activity-item {
@@ -353,6 +355,8 @@ body {
   background: #f7fafc;
   border-radius: 8px;
   gap: 1rem;
+  min-width: 300px;
+  flex-shrink: 0;
 }
 
 .activity-icon {
@@ -814,6 +818,15 @@ body {
     width: 100%;
     margin-top: 1rem;
   }
+
+  .activity-list {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .activity-item {
+    min-width: auto;
+  }
   
   .opportunities-kanban {
     flex-direction: column;
@@ -907,23 +920,27 @@ body {
 
 /* カスタムスクロールバー */
 .opportunities-kanban::-webkit-scrollbar,
-.pipeline-stages::-webkit-scrollbar {
+.pipeline-stages::-webkit-scrollbar,
+.activity-list::-webkit-scrollbar {
   height: 6px;
 }
 
 .opportunities-kanban::-webkit-scrollbar-track,
-.pipeline-stages::-webkit-scrollbar-track {
+.pipeline-stages::-webkit-scrollbar-track,
+.activity-list::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 3px;
 }
 
 .opportunities-kanban::-webkit-scrollbar-thumb,
-.pipeline-stages::-webkit-scrollbar-thumb {
+.pipeline-stages::-webkit-scrollbar-thumb,
+.activity-list::-webkit-scrollbar-thumb {
   background: #cbd5e0;
   border-radius: 3px;
 }
 
 .opportunities-kanban::-webkit-scrollbar-thumb:hover,
-.pipeline-stages::-webkit-scrollbar-thumb:hover {
+.pipeline-stages::-webkit-scrollbar-thumb:hover,
+.activity-list::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
 }
