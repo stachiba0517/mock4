@@ -835,50 +835,107 @@ const App: React.FC = () => {
             </div>
 
             <div className="calendar-view">
-              <div className="calendar-week">
-                {(() => {
-                  const startDate = new Date(selectedDate);
-                  const startOfWeek = new Date(startDate);
-                  startOfWeek.setDate(startDate.getDate() - startDate.getDay());
+              <div className="calendar-month">
+                <div className="month-header">
+                  <button 
+                    className="month-nav-btn" 
+                    onClick={() => {
+                      const date = new Date(selectedDate);
+                      date.setMonth(date.getMonth() - 1);
+                      setSelectedDate(date.toISOString().split('T')[0]);
+                    }}
+                  >
+                    ←
+                  </button>
+                  <h3>
+                    {new Date(selectedDate).toLocaleDateString('ja-JP', { 
+                      year: 'numeric', 
+                      month: 'long' 
+                    })}
+                  </h3>
+                  <button 
+                    className="month-nav-btn"
+                    onClick={() => {
+                      const date = new Date(selectedDate);
+                      date.setMonth(date.getMonth() + 1);
+                      setSelectedDate(date.toISOString().split('T')[0]);
+                    }}
+                  >
+                    →
+                  </button>
+                </div>
+                
+                <div className="calendar-grid">
+                  <div className="weekdays-header">
+                    {['日', '月', '火', '水', '木', '金', '土'].map((day, index) => (
+                      <div key={index} className="weekday-header">{day}</div>
+                    ))}
+                  </div>
                   
-                  const weekDays = [];
-                  for (let i = 0; i < 7; i++) {
-                    const day = new Date(startOfWeek);
-                    day.setDate(startOfWeek.getDate() + i);
-                    weekDays.push(day);
-                  }
+                  <div className="calendar-days">
+                    {(() => {
+                      const currentDate = new Date(selectedDate);
+                      const year = currentDate.getFullYear();
+                      const month = currentDate.getMonth();
+                      
+                      // 月の最初の日
+                      const firstDay = new Date(year, month, 1);
+                      // 月の最後の日
+                      const lastDay = new Date(year, month + 1, 0);
+                      
+                      // カレンダーグリッドの開始日（前月の日曜日から）
+                      const startDate = new Date(firstDay);
+                      startDate.setDate(firstDay.getDate() - firstDay.getDay());
+                      
+                      // カレンダーグリッドの終了日（翌月の土曜日まで）
+                      const endDate = new Date(lastDay);
+                      endDate.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
+                      
+                      const days = [];
+                      const currentDay = new Date(startDate);
+                      
+                      while (currentDay <= endDate) {
+                        days.push(new Date(currentDay));
+                        currentDay.setDate(currentDay.getDate() + 1);
+                      }
 
-                  return weekDays.map((day, index) => {
-                    const dayStr = day.toISOString().split('T')[0];
-                    const dayEvents = calendarEvents.filter(event => event.date === dayStr);
-                    const isToday = dayStr === new Date().toISOString().split('T')[0];
-                    const isSelected = dayStr === selectedDate;
+                      return days.map((day, index) => {
+                        const dayStr = day.toISOString().split('T')[0];
+                        const dayEvents = calendarEvents.filter(event => event.date === dayStr);
+                        const isToday = dayStr === new Date().toISOString().split('T')[0];
+                        const isCurrentMonth = day.getMonth() === month;
+                        const isSelected = dayStr === selectedDate;
 
-                    return (
-                      <div key={index} className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}>
-                        <div className="day-header">
-                          <div className="day-name">
-                            {['日', '月', '火', '水', '木', '金', '土'][day.getDay()]}
-                          </div>
-                          <div className="day-number">{day.getDate()}</div>
-                        </div>
-                        <div className="day-events">
-                          {dayEvents.map((event) => (
-                            <div key={event.id} className={`event-item event-${event.type} status-${event.status}`}>
-                              <div className="event-time">{event.startTime}</div>
-                              <div className="event-title">{event.title}</div>
-                              <div className="event-customer">{event.customerName}</div>
-                              <div className="event-sales">{event.assignedSales}</div>
-                              {event.location && (
-                                <div className="event-location">📍 {event.location}</div>
-                              )}
+                        return (
+                          <div 
+                            key={index} 
+                            className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${!isCurrentMonth ? 'other-month' : ''}`}
+                            onClick={() => setSelectedDate(dayStr)}
+                          >
+                            <div className="day-number">{day.getDate()}</div>
+                            <div className="day-tasks">
+                              {dayEvents.map((event) => (
+                                <div key={event.id} className={`task-item event-${event.type} status-${event.status}`}>
+                                  <div className="task-time">{event.startTime}</div>
+                                  <div className="task-sales">{event.assignedSales}</div>
+                                  <div className="task-destination">
+                                    {event.customerName ? `→ ${event.customerName}` : event.title}
+                                  </div>
+                                  <div className="task-type">
+                                    {event.type === 'visit' ? '🏢' : 
+                                     event.type === 'meeting' ? '🤝' : 
+                                     event.type === 'call' ? '📞' : 
+                                     event.type === 'demo' ? '💻' : '📋'}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  });
-                })()}
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
               </div>
             </div>
 
