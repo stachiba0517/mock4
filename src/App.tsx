@@ -69,6 +69,23 @@ interface Task {
   relatedOpportunityId: number | null;
 }
 
+interface CalendarEvent {
+  id: number;
+  title: string;
+  description: string;
+  type: 'visit' | 'meeting' | 'call' | 'demo' | 'other';
+  date: string;
+  startTime: string;
+  endTime: string;
+  assignedSales: string;
+  customerId: number | null;
+  customerName: string | null;
+  location: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
+  notes: string;
+  relatedOpportunityId: number | null;
+}
+
 interface Analytics {
   salesForecast: {
     currentMonth: {
@@ -146,10 +163,13 @@ const App: React.FC = () => {
   const [opportunities, setOpportunities] = useState<SalesOpportunity[]>([]);
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showOpportunityModal, setShowOpportunityModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({
     companyName: '',
     contactName: '',
@@ -178,25 +198,42 @@ const App: React.FC = () => {
     competitorInfo: '',
     decisionMakers: []
   });
+  const [newCalendarEvent, setNewCalendarEvent] = useState<Partial<CalendarEvent>>({
+    title: '',
+    description: '',
+    type: 'visit',
+    date: new Date().toISOString().split('T')[0],
+    startTime: '09:00',
+    endTime: '10:00',
+    assignedSales: '',
+    customerId: null,
+    customerName: '',
+    location: '',
+    status: 'scheduled',
+    notes: '',
+    relatedOpportunityId: null
+  });
 
   // データ読み込み
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [customersRes, opportunitiesRes, communicationsRes, tasksRes, analyticsRes] = await Promise.all([
+        const [customersRes, opportunitiesRes, communicationsRes, tasksRes, analyticsRes, calendarRes] = await Promise.all([
           fetch('/api/customers.json'),
           fetch('/api/sales-opportunities.json'),
           fetch('/api/communications.json'),
           fetch('/api/tasks.json'),
-          fetch('/api/analytics.json')
+          fetch('/api/analytics.json'),
+          fetch('/api/calendar-events.json')
         ]);
 
-        const [customersData, opportunitiesData, communicationsData, tasksData, analyticsData] = await Promise.all([
+        const [customersData, opportunitiesData, communicationsData, tasksData, analyticsData, calendarData] = await Promise.all([
           customersRes.json(),
           opportunitiesRes.json(),
           communicationsRes.json(),
           tasksRes.json(),
-          analyticsRes.json()
+          analyticsRes.json(),
+          calendarRes.json()
         ]);
 
         setCustomers(customersData);
@@ -204,6 +241,7 @@ const App: React.FC = () => {
         setCommunications(communicationsData);
         setTasks(tasksData);
         setAnalytics(analyticsData);
+        setCalendarEvents(calendarData);
         setLoading(false);
       } catch (error) {
         console.error('データ読み込みエラー:', error);
@@ -322,6 +360,59 @@ const App: React.FC = () => {
     }));
   };
 
+  // カレンダーイベント追加ハンドラー
+  const handleAddCalendarEvent = () => {
+    if (!newCalendarEvent.title || !newCalendarEvent.date || !newCalendarEvent.assignedSales) {
+      alert('必須項目を入力してください。');
+      return;
+    }
+
+    const calendarEvent: CalendarEvent = {
+      id: Math.max(...calendarEvents.map(e => e.id), 0) + 1,
+      title: newCalendarEvent.title || '',
+      description: newCalendarEvent.description || '',
+      type: newCalendarEvent.type || 'visit',
+      date: newCalendarEvent.date || '',
+      startTime: newCalendarEvent.startTime || '09:00',
+      endTime: newCalendarEvent.endTime || '10:00',
+      assignedSales: newCalendarEvent.assignedSales || '',
+      customerId: newCalendarEvent.customerId || null,
+      customerName: newCalendarEvent.customerId ? 
+        customers.find(c => c.id === newCalendarEvent.customerId)?.companyName || '' : 
+        newCalendarEvent.customerName || '',
+      location: newCalendarEvent.location || '',
+      status: newCalendarEvent.status || 'scheduled',
+      notes: newCalendarEvent.notes || '',
+      relatedOpportunityId: newCalendarEvent.relatedOpportunityId || null
+    };
+
+    setCalendarEvents([...calendarEvents, calendarEvent]);
+    setShowCalendarModal(false);
+    setNewCalendarEvent({
+      title: '',
+      description: '',
+      type: 'visit',
+      date: selectedDate,
+      startTime: '09:00',
+      endTime: '10:00',
+      assignedSales: '',
+      customerId: null,
+      customerName: '',
+      location: '',
+      status: 'scheduled',
+      notes: '',
+      relatedOpportunityId: null
+    });
+  };
+
+  // カレンダーイベント入力値更新ハンドラー
+  const handleCalendarInputChange = (field: keyof CalendarEvent, value: string | number | null) => {
+    setNewCalendarEvent(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   if (loading) {
     return (
       <div className="loading">
@@ -392,6 +483,12 @@ const App: React.FC = () => {
               onClick={() => setActiveTab('reports')}
             >
               レポート
+            </button>
+            <button 
+              className={`nav-btn ${activeTab === 'calendar' ? 'active' : ''}`}
+              onClick={() => setActiveTab('calendar')}
+            >
+              カレンダー
             </button>
           </nav>
         </div>
@@ -703,6 +800,141 @@ const App: React.FC = () => {
                 <li>活動状況レポート</li>
                 <li>カスタムレポート作成</li>
               </ul>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'calendar' && (
+          <div className="sales-calendar">
+            <div className="section-header">
+              <h2>📅 営業カレンダー</h2>
+              <button className="btn-primary" onClick={() => setShowCalendarModal(true)}>+ 予定追加</button>
+            </div>
+
+            <div className="calendar-controls">
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="date-input"
+              />
+              <select className="filter-select">
+                <option>全ての営業担当</option>
+                <option>佐藤 花子</option>
+                <option>鈴木 一郎</option>
+                <option>田村 正樹</option>
+              </select>
+              <select className="filter-select">
+                <option>全ての種類</option>
+                <option>訪問</option>
+                <option>会議</option>
+                <option>電話</option>
+                <option>デモ</option>
+                <option>その他</option>
+              </select>
+            </div>
+
+            <div className="calendar-view">
+              <div className="calendar-week">
+                {(() => {
+                  const startDate = new Date(selectedDate);
+                  const startOfWeek = new Date(startDate);
+                  startOfWeek.setDate(startDate.getDate() - startDate.getDay());
+                  
+                  const weekDays = [];
+                  for (let i = 0; i < 7; i++) {
+                    const day = new Date(startOfWeek);
+                    day.setDate(startOfWeek.getDate() + i);
+                    weekDays.push(day);
+                  }
+
+                  return weekDays.map((day, index) => {
+                    const dayStr = day.toISOString().split('T')[0];
+                    const dayEvents = calendarEvents.filter(event => event.date === dayStr);
+                    const isToday = dayStr === new Date().toISOString().split('T')[0];
+                    const isSelected = dayStr === selectedDate;
+
+                    return (
+                      <div key={index} className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}>
+                        <div className="day-header">
+                          <div className="day-name">
+                            {['日', '月', '火', '水', '木', '金', '土'][day.getDay()]}
+                          </div>
+                          <div className="day-number">{day.getDate()}</div>
+                        </div>
+                        <div className="day-events">
+                          {dayEvents.map((event) => (
+                            <div key={event.id} className={`event-item event-${event.type} status-${event.status}`}>
+                              <div className="event-time">{event.startTime}</div>
+                              <div className="event-title">{event.title}</div>
+                              <div className="event-customer">{event.customerName}</div>
+                              <div className="event-sales">{event.assignedSales}</div>
+                              {event.location && (
+                                <div className="event-location">📍 {event.location}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+
+            <div className="calendar-summary">
+              <h3>今週の予定サマリー</h3>
+              <div className="summary-stats">
+                <div className="stat-item">
+                  <div className="stat-label">総予定数</div>
+                  <div className="stat-value">{calendarEvents.length}</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-label">顧客訪問</div>
+                  <div className="stat-value">{calendarEvents.filter(e => e.type === 'visit').length}</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-label">会議</div>
+                  <div className="stat-value">{calendarEvents.filter(e => e.type === 'meeting').length}</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-label">デモ</div>
+                  <div className="stat-value">{calendarEvents.filter(e => e.type === 'demo').length}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="upcoming-events">
+              <h3>今後の予定</h3>
+              <div className="events-list">
+                {calendarEvents
+                  .filter(event => event.date >= new Date().toISOString().split('T')[0])
+                  .sort((a, b) => new Date(a.date + ' ' + a.startTime).getTime() - new Date(b.date + ' ' + b.startTime).getTime())
+                  .slice(0, 5)
+                  .map((event) => (
+                    <div key={event.id} className={`upcoming-event event-${event.type}`}>
+                      <div className="event-datetime">
+                        <div className="event-date">{event.date}</div>
+                        <div className="event-time">{event.startTime} - {event.endTime}</div>
+                      </div>
+                      <div className="event-details">
+                        <h4>{event.title}</h4>
+                        <p>{event.description}</p>
+                        <div className="event-meta">
+                          <span className="event-type-badge">{
+                            event.type === 'visit' ? '🏢 訪問' :
+                            event.type === 'meeting' ? '🤝 会議' :
+                            event.type === 'call' ? '📞 電話' :
+                            event.type === 'demo' ? '💻 デモ' : '📋 その他'
+                          }</span>
+                          <span className="event-sales">👤 {event.assignedSales}</span>
+                          {event.customerName && <span className="event-customer">🏢 {event.customerName}</span>}
+                        </div>
+                        {event.location && <div className="event-location">📍 {event.location}</div>}
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         )}
