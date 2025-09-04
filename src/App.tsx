@@ -1250,6 +1250,179 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* 新規カレンダーイベント追加モーダル */}
+      {showCalendarModal && (
+        <div className="modal-overlay" onClick={() => setShowCalendarModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>新規予定追加</h3>
+              <button className="modal-close" onClick={() => setShowCalendarModal(false)}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>予定名 <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    value={newCalendarEvent.title || ''}
+                    onChange={(e) => handleCalendarInputChange('title', e.target.value)}
+                    placeholder="顧客訪問・会議・デモ等"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>種類</label>
+                  <select
+                    value={newCalendarEvent.type || 'visit'}
+                    onChange={(e) => handleCalendarInputChange('type', e.target.value)}
+                  >
+                    <option value="visit">🏢 顧客訪問</option>
+                    <option value="meeting">🤝 会議</option>
+                    <option value="call">📞 電話</option>
+                    <option value="demo">💻 デモ</option>
+                    <option value="other">📋 その他</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>日付 <span className="required">*</span></label>
+                  <input
+                    type="date"
+                    value={newCalendarEvent.date || selectedDate}
+                    onChange={(e) => handleCalendarInputChange('date', e.target.value)}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>開始時間</label>
+                  <input
+                    type="time"
+                    value={newCalendarEvent.startTime || '09:00'}
+                    onChange={(e) => handleCalendarInputChange('startTime', e.target.value)}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>終了時間</label>
+                  <input
+                    type="time"
+                    value={newCalendarEvent.endTime || '10:00'}
+                    onChange={(e) => handleCalendarInputChange('endTime', e.target.value)}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>担当営業 <span className="required">*</span></label>
+                  <select
+                    value={newCalendarEvent.assignedSales || ''}
+                    onChange={(e) => handleCalendarInputChange('assignedSales', e.target.value)}
+                  >
+                    <option value="">担当営業を選択</option>
+                    <option value="佐藤 花子">佐藤 花子</option>
+                    <option value="鈴木 一郎">鈴木 一郎</option>
+                    <option value="田村 正樹">田村 正樹</option>
+                    <option value="営業部全員">営業部全員</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>関連顧客</label>
+                  <select
+                    value={newCalendarEvent.customerId || 0}
+                    onChange={(e) => handleCalendarInputChange('customerId', parseInt(e.target.value) || null)}
+                  >
+                    <option value={0}>顧客を選択（任意）</option>
+                    {customers.map(customer => (
+                      <option key={customer.id} value={customer.id}>
+                        {customer.companyName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>顧客名（手入力）</label>
+                  <input
+                    type="text"
+                    value={newCalendarEvent.customerName || ''}
+                    onChange={(e) => handleCalendarInputChange('customerName', e.target.value)}
+                    placeholder="新規顧客名など"
+                    disabled={!!newCalendarEvent.customerId}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>場所・住所</label>
+                  <input
+                    type="text"
+                    value={newCalendarEvent.location || ''}
+                    onChange={(e) => handleCalendarInputChange('location', e.target.value)}
+                    placeholder="東京都渋谷区... / オンライン / 電話会議"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>関連案件</label>
+                  <select
+                    value={newCalendarEvent.relatedOpportunityId || 0}
+                    onChange={(e) => handleCalendarInputChange('relatedOpportunityId', parseInt(e.target.value) || null)}
+                  >
+                    <option value={0}>関連案件を選択（任意）</option>
+                    {opportunities.map(opp => (
+                      <option key={opp.id} value={opp.id}>
+                        {opp.title} - {opp.customerName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>ステータス</label>
+                  <select
+                    value={newCalendarEvent.status || 'scheduled'}
+                    onChange={(e) => handleCalendarInputChange('status', e.target.value)}
+                  >
+                    <option value="scheduled">予定</option>
+                    <option value="completed">完了</option>
+                    <option value="cancelled">キャンセル</option>
+                  </select>
+                </div>
+                
+                <div className="form-group full-width">
+                  <label>詳細・説明</label>
+                  <textarea
+                    value={newCalendarEvent.description || ''}
+                    onChange={(e) => handleCalendarInputChange('description', e.target.value)}
+                    placeholder="会議の目的、議題、準備事項など..."
+                    rows={2}
+                  />
+                </div>
+                
+                <div className="form-group full-width">
+                  <label>備考・メモ</label>
+                  <textarea
+                    value={newCalendarEvent.notes || ''}
+                    onChange={(e) => handleCalendarInputChange('notes', e.target.value)}
+                    placeholder="参加者、持参物、注意事項など..."
+                    rows={2}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowCalendarModal(false)}>
+                キャンセル
+              </button>
+              <button className="btn-primary" onClick={handleAddCalendarEvent}>
+                予定を追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <footer className="app-footer">
         <p>&copy; 2024 CRM システム - 営業支援プラットフォーム</p>
         <div className="footer-links">
