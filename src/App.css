@@ -1757,20 +1757,20 @@ body {
 }
 
 .team-kpi-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 1.5rem;
-  color: white;
+  color: #2d3748;
 }
 
 .team-kpi-card.primary {
-  background: rgba(255, 255, 255, 0.2);
+  background: #f0f9ff;
+  border-color: #bfdbfe;
 }
 
 .team-kpi-card h4 {
-  color: white;
+  color: #2d3748;
   margin-bottom: 1rem;
   font-size: 1.1rem;
   display: flex;
@@ -1786,7 +1786,8 @@ body {
 }
 
 .kpi-period {
-  background: rgba(255, 255, 255, 0.2);
+  background: #e2e8f0;
+  color: #4a5568;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -1796,8 +1797,20 @@ body {
   margin-bottom: 1rem;
 }
 
+.team-kpi-card .kpi-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.team-kpi-card .kpi-sub {
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
 .kpi-achieved {
-  color: rgba(255, 255, 255, 0.9);
+  color: #4a5568;
   font-size: 1rem;
   margin-top: 0.5rem;
 }
@@ -1812,14 +1825,16 @@ body {
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
+  color: #2d3748;
 }
 
 .progress-percentage {
   font-weight: 600;
+  color: #2d3748;
 }
 
 .progress-remaining {
-  color: rgba(255, 255, 255, 0.8);
+  color: #6b7280;
 }
 
 .kpi-grid {
@@ -1836,13 +1851,13 @@ body {
 
 .kpi-label {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: #6b7280;
 }
 
 .kpi-number {
   font-size: 1.25rem;
   font-weight: 600;
-  color: white;
+  color: #2d3748;
 }
 
 /* チーム実績セクション */
@@ -1851,7 +1866,7 @@ body {
 }
 
 .team-performance-section h4 {
-  color: white;
+  color: #2d3748;
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
 }
@@ -1863,9 +1878,8 @@ body {
 }
 
 .team-member-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 1.25rem;
   display: flex;
@@ -1874,8 +1888,8 @@ body {
 }
 
 .team-member-card.top-performer {
-  background: rgba(255, 215, 0, 0.2);
-  border-color: rgba(255, 215, 0, 0.4);
+  background: #fef3c7;
+  border-color: #fbbf24;
 }
 
 .member-rank {
@@ -1885,7 +1899,7 @@ body {
 }
 
 .team-member-card h5 {
-  color: white;
+  color: #2d3748;
   margin-bottom: 0.75rem;
   text-align: center;
   font-size: 1.1rem;
@@ -1902,6 +1916,7 @@ body {
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
+  color: #2d3748;
 }
 
 .achievement-rate {
