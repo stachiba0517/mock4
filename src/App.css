@@ -1944,9 +1944,16 @@ body {
 }
 
 .individual-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.activities-and-tasks {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  margin-top: 1rem;
 }
 
 .individual-performance h4 {
@@ -1956,9 +1963,10 @@ body {
 }
 
 .individual-kpi-cards {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .individual-kpi-card {
@@ -1968,10 +1976,28 @@ body {
   padding: 1.25rem;
 }
 
+.individual-kpi-card.primary {
+  background: #f0f9ff;
+  border-color: #bfdbfe;
+}
+
 .individual-kpi-card h5 {
-  color: #4a5568;
+  color: #2d3748;
   margin-bottom: 0.75rem;
   font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.individual-kpi-card .kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.individual-kpi-card .kpi-sub {
+  color: #4a5568;
+  font-size: 0.85rem;
 }
 
 .recent-activities h4,
@@ -2899,6 +2925,24 @@ body {
     flex-direction: column;
     gap: 0.5rem;
   }
+  
+  .individual-kpi-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .activities-and-tasks {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 個人活動状況の詳細表示スタイル */
@@ -2979,7 +3023,7 @@ body {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
@@ -3065,7 +3109,7 @@ body {
 
 /* パフォーマンス比較チャート */
 .performance-comparison {
-  margin-top: 2rem;
+  margin-top: 1rem;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 8px;

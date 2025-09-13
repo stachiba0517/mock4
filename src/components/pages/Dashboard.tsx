@@ -326,25 +326,26 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
 
-            {/* 直近の活動履歴 */}
-            <div className="recent-activities">
-              <div className="activities-header">
-                <h4>📝 直近の活動履歴</h4>
-                <div className="activity-filters">
-                  <select className="filter-select small">
-                    <option>全ての活動</option>
-                    <option>電話</option>
-                    <option>メール</option>
-                    <option>会議</option>
-                    <option>訪問</option>
-                  </select>
-                  <select className="filter-select small">
-                    <option>過去7日</option>
-                    <option>過去14日</option>
-                    <option>過去30日</option>
-                  </select>
+            <div className="activities-and-tasks">
+              {/* 直近の活動履歴 */}
+              <div className="recent-activities">
+                <div className="activities-header">
+                  <h4>📝 直近の活動履歴</h4>
+                  <div className="activity-filters">
+                    <select className="filter-select small">
+                      <option>全ての活動</option>
+                      <option>電話</option>
+                      <option>メール</option>
+                      <option>会議</option>
+                      <option>訪問</option>
+                    </select>
+                    <select className="filter-select small">
+                      <option>過去7日</option>
+                      <option>過去14日</option>
+                      <option>過去30日</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
               
               {/* 活動サマリー */}
               <div className="activity-summary">
@@ -439,10 +440,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                   <button className="btn-secondary">さらに表示</button>
                 </div>
               </div>
-            </div>
-
-            {/* 今日のタスク・予定 */}
-            <div className="today-tasks">
+              
+              {/* 今日のタスク・予定 */}
+              <div className="today-tasks">
               <div className="tasks-header">
                 <h4>✅ 今日のタスク・予定</h4>
                 <div className="task-summary">
@@ -561,6 +561,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
