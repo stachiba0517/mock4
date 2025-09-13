@@ -86,6 +86,41 @@ interface CalendarEvent {
   relatedOpportunityId: number | null;
 }
 
+interface DailyReport {
+  id: number;
+  date: string;
+  salesPerson: string;
+  workingHours: {
+    start: string;
+    end: string;
+    break: number; // 休憩時間（分）
+  };
+  activities: Array<{
+    id: number;
+    type: 'visit' | 'call' | 'email' | 'meeting' | 'proposal' | 'other';
+    customerId: number | null;
+    customerName: string;
+    startTime: string;
+    endTime: string;
+    description: string;
+    result: string;
+    nextAction: string;
+    priority: '高' | '中' | '低';
+  }>;
+  achievements: {
+    newLeads: number;
+    meetings: number;
+    proposals: number;
+    contracts: number;
+    revenue: number;
+  };
+  challenges: string;
+  tomorrowPlan: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Analytics {
   salesForecast: {
     currentMonth: {
@@ -174,6 +209,27 @@ const App: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showCustomerDetail, setShowCustomerDetail] = useState(false);
   const [showCustomerDetailPage, setShowCustomerDetailPage] = useState(false);
+  const [dailyReports, setDailyReports] = useState<DailyReport[]>([]);
+  const [currentReport, setCurrentReport] = useState<Partial<DailyReport>>({
+    date: new Date().toISOString().split('T')[0],
+    salesPerson: '佐藤 花子',
+    workingHours: {
+      start: '09:00',
+      end: '18:00',
+      break: 60
+    },
+    activities: [],
+    achievements: {
+      newLeads: 0,
+      meetings: 0,
+      proposals: 0,
+      contracts: 0,
+      revenue: 0
+    },
+    challenges: '',
+    tomorrowPlan: '',
+    notes: ''
+  });
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({
     companyName: '',
     contactName: '',
@@ -364,6 +420,86 @@ const App: React.FC = () => {
     setSelectedCustomer(null);
   };
 
+  // 営業日報保存ハンドラー
+  const handleSaveDailyReport = () => {
+    if (!currentReport.date || !currentReport.salesPerson) {
+      alert('必須項目を入力してください。');
+      return;
+    }
+
+    const report: DailyReport = {
+      id: Math.max(...dailyReports.map(r => r.id), 0) + 1,
+      date: currentReport.date || '',
+      salesPerson: currentReport.salesPerson || '',
+      workingHours: currentReport.workingHours || { start: '09:00', end: '18:00', break: 60 },
+      activities: currentReport.activities || [],
+      achievements: currentReport.achievements || { newLeads: 0, meetings: 0, proposals: 0, contracts: 0, revenue: 0 },
+      challenges: currentReport.challenges || '',
+      tomorrowPlan: currentReport.tomorrowPlan || '',
+      notes: currentReport.notes || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const existingIndex = dailyReports.findIndex(r => r.date === report.date && r.salesPerson === report.salesPerson);
+    if (existingIndex >= 0) {
+      const updatedReports = [...dailyReports];
+      updatedReports[existingIndex] = { ...report, id: dailyReports[existingIndex].id, createdAt: dailyReports[existingIndex].createdAt };
+      setDailyReports(updatedReports);
+    } else {
+      setDailyReports([...dailyReports, report]);
+    }
+
+    alert('日報を保存しました。');
+  };
+
+  // 営業日報入力値更新ハンドラー
+  const handleReportInputChange = (field: string, value: any) => {
+    setCurrentReport(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 活動追加ハンドラー
+  const handleAddActivity = () => {
+    const newActivity = {
+      id: Math.max(...(currentReport.activities?.map(a => a.id) || [0]), 0) + 1,
+      type: 'visit' as const,
+      customerId: null,
+      customerName: '',
+      startTime: '09:00',
+      endTime: '10:00',
+      description: '',
+      result: '',
+      nextAction: '',
+      priority: '中' as const
+    };
+
+    setCurrentReport(prev => ({
+      ...prev,
+      activities: [...(prev.activities || []), newActivity]
+    }));
+  };
+
+  // 活動削除ハンドラー
+  const handleRemoveActivity = (activityId: number) => {
+    setCurrentReport(prev => ({
+      ...prev,
+      activities: prev.activities?.filter(a => a.id !== activityId) || []
+    }));
+  };
+
+  // 活動更新ハンドラー
+  const handleUpdateActivity = (activityId: number, field: string, value: any) => {
+    setCurrentReport(prev => ({
+      ...prev,
+      activities: prev.activities?.map(a => 
+        a.id === activityId ? { ...a, [field]: value } : a
+      ) || []
+    }));
+  };
+
   // 営業案件追加ハンドラー
   const handleAddOpportunity = () => {
     if (!newOpportunity.title || !newOpportunity.customerId || !newOpportunity.value) {
@@ -537,7 +673,7 @@ const App: React.FC = () => {
               className={`nav-btn ${activeTab === 'documents' ? 'active' : ''}`}
               onClick={() => setActiveTab('documents')}
             >
-              文書作成
+              営業日報
             </button>
             <button 
               className={`nav-btn ${activeTab === 'reports' ? 'active' : ''}`}
@@ -1139,20 +1275,61 @@ const App: React.FC = () => {
             )}
 
         {activeTab === 'documents' && (
-          <div className="document-generator">
-            <h2>📄 見積書・提案書作成</h2>
-            <p>顧客データと連動した見積書や提案書を効率的に作成・管理します。</p>
-            <div className="feature-placeholder">
-              <h3>主な機能:</h3>
-              <ul>
-                <li>テンプレート管理</li>
-                <li>自動データ連携</li>
-                <li>承認フロー</li>
-                <li>PDF出力</li>
-              </ul>
+          <div className="daily-report-page">
+            <div className="report-header">
+              <h2>📝 営業日報入力</h2>
+              <p>日々の営業活動を記録し、効果的な営業管理を実現します</p>
+              <div className="report-actions">
+                <button className="btn-secondary" onClick={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  setCurrentReport({
+                    date: today,
+                    salesPerson: '佐藤 花子',
+                    workingHours: { start: '09:00', end: '18:00', break: 60 },
+                    activities: [],
+                    achievements: { newLeads: 0, meetings: 0, proposals: 0, contracts: 0, revenue: 0 },
+                    challenges: '',
+                    tomorrowPlan: '',
+                    notes: ''
+                  });
+                }}>
+                  新規作成
+                </button>
+                <button className="btn-primary" onClick={handleSaveDailyReport}>
+                  日報を保存
+                </button>
+              </div>
+            </div>
+            
+            {/* 基本情報フォーム */}
+            <div className="report-content">
+              <div className="form-section">
+                <h3>📅 基本情報</h3>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>日付 <span className="required">*</span></label>
+                    <input
+                      type="date"
+                      value={currentReport.date || ''}
+                      onChange={(e) => handleReportInputChange('date', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>営業担当者 <span className="required">*</span></label>
+                    <select
+                      value={currentReport.salesPerson || ''}
+                      onChange={(e) => handleReportInputChange('salesPerson', e.target.value)}
+                    >
+                      <option value="佐藤 花子">佐藤 花子</option>
+                      <option value="鈴木 一郎">鈴木 一郎</option>
+                      <option value="田村 正樹">田村 正樹</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
+          </div>
+        )}
 
         {activeTab === 'reports' && (
           <div className="reports-dashboard">
