@@ -19,6 +19,7 @@ import CustomerManagement from './components/pages/CustomerManagement';
 import CustomerDetail from './components/pages/CustomerDetail';
 import SalesOpportunities from './components/pages/SalesOpportunities';
 import SalesCalendar from './components/pages/SalesCalendar';
+import SalesReport from './components/pages/SalesReport';
 import SimplePage from './components/pages/SimplePage';
 
 // Modals
@@ -479,15 +480,9 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'documents' && (
-              <SimplePage
-                title="📝 営業日報入力"
-                description="日々の営業活動を記録し、効果的な営業管理を実現します。"
-                features={[
-                  '日次活動記録',
-                  '成果・課題管理',
-                  '翌日計画立案',
-                  'チーム共有機能'
-                ]}
+              <SalesReport
+                customers={customers}
+                opportunities={opportunities}
               />
             )}
 
