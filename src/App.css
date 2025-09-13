@@ -1720,3 +1720,874 @@ body {
     text-align: left;
   }
 }
+
+/* 新しいダッシュボードレイアウト */
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* チーム全体情報セクション */
+.team-overview-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.team-overview-section .section-header h3 {
+  color: white;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.team-overview-section .section-header p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+}
+
+.team-kpi-cards {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.team-kpi-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: white;
+}
+
+.team-kpi-card.primary {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.team-kpi-card h4 {
+  color: white;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.kpi-period {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+.kpi-main {
+  margin-bottom: 1rem;
+}
+
+.kpi-achieved {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.progress-bar.large {
+  height: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.progress-percentage {
+  font-weight: 600;
+}
+
+.progress-remaining {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.kpi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.kpi-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.kpi-number {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* チーム実績セクション */
+.team-performance-section {
+  margin-top: 1rem;
+}
+
+.team-performance-section h4 {
+  color: white;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.team-performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.team-member-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.team-member-card.top-performer {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.member-rank {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.team-member-card h5 {
+  color: white;
+  margin-bottom: 0.75rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.member-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.achievement-rate {
+  font-weight: 600;
+  color: #ffd700;
+}
+
+/* 個別情報セクション */
+.individual-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.individual-section .section-header h3 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.individual-section .section-header p {
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.individual-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.individual-performance h4 {
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+.individual-kpi-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.individual-kpi-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.individual-kpi-card h5 {
+  color: #4a5568;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.recent-activities h4,
+.today-tasks h4 {
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+}
+
+/* 活動タイムライン */
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.activity-timeline-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #e2e8f0;
+}
+
+.activity-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+  gap: 0.25rem;
+}
+
+.activity-date {
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.activity-hour {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.activity-timeline-item .activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.activity-timeline-item .activity-content {
+  flex: 1;
+}
+
+.activity-timeline-item h6 {
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.activity-timeline-item p {
+  color: #718096;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.activity-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.next-action {
+  font-size: 0.8rem;
+  color: #4a5568;
+  background: #edf2f7;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* タスクリスト */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.task-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.task-priority {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.25rem;
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.priority-dot.priority-高 {
+  background: #f56565;
+}
+
+.priority-dot.priority-中 {
+  background: #ed8936;
+}
+
+.priority-dot.priority-低 {
+  background: #48bb78;
+}
+
+.task-content {
+  flex: 1;
+}
+
+.task-item h6 {
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.task-item p {
+  color: #718096;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.task-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.task-due {
+  color: #4a5568;
+}
+
+.task-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.task-status.status-進行中 {
+  background: #bee3f8;
+  color: #2b6cb0;
+}
+
+.task-status.status-待機中 {
+  background: #fef5e7;
+  color: #c05621;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1200px) {
+  .individual-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-kpi-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .team-performance-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-layout {
+    gap: 1rem;
+  }
+  
+  .team-overview-section,
+  .individual-section {
+    padding: 1.5rem;
+  }
+  
+  .activity-timeline-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .activity-time {
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+/* 顧客詳細ページ（大画面表示） */
+.customer-detail-page {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.detail-page-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.back-btn {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  color: #4a5568;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+}
+
+.page-title h2 {
+  color: #2d3748;
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+}
+
+.page-title p {
+  color: #718096;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.detail-page-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 顧客基礎情報（大画面） */
+.customer-info-fullscreen {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.customer-info-fullscreen h3 {
+  color: #2d3748;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.info-grid-fullscreen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.info-section {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.info-section h4 {
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+}
+
+.info-table {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-table .info-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.info-table .info-row:last-child {
+  border-bottom: none;
+}
+
+.info-table .info-label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.info-table .info-value {
+  color: #2d3748;
+  font-weight: 400;
+}
+
+.info-table .info-value a {
+  color: #3182ce;
+  text-decoration: none;
+}
+
+.info-table .info-value a:hover {
+  text-decoration: underline;
+}
+
+.notes-section {
+  background: #edf2f7;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border-left: 4px solid #4299e1;
+}
+
+.notes-section h4 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notes-content p {
+  color: #4a5568;
+  line-height: 1.7;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* 取引履歴（大画面） */
+.transaction-history-fullscreen {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.history-header h3 {
+  color: #2d3748;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.history-summary {
+  display: flex;
+  gap: 2rem;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.summary-label {
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.summary-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.history-filters-fullscreen {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.history-timeline-fullscreen {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.timeline-item-fullscreen {
+  display: grid;
+  grid-template-columns: 120px 100px 1fr;
+  gap: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.2s;
+}
+
+.timeline-item-fullscreen:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e0;
+}
+
+.timeline-date-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.timeline-date {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.timeline-time {
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.timeline-icon-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timeline-icon-large {
+  width: 50px;
+  height: 50px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.timeline-type {
+  font-size: 0.8rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.timeline-content-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.timeline-header-fullscreen {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.timeline-header-fullscreen h4 {
+  color: #2d3748;
+  font-size: 1.1rem;
+  margin: 0;
+  flex: 1;
+}
+
+.timeline-summary-fullscreen p {
+  color: #4a5568;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.timeline-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-item {
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.detail-item strong {
+  color: #4a5568;
+}
+
+.no-history-fullscreen {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #718096;
+}
+
+.no-history-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-history-fullscreen h4 {
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.no-history-fullscreen p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1200px) {
+  .info-grid-fullscreen {
+    grid-template-columns: 1fr;
+  }
+  
+  .timeline-item-fullscreen {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .timeline-date-column,
+  .timeline-icon-column {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .detail-page-content {
+    padding: 1rem;
+  }
+  
+  .info-table .info-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .history-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .history-summary {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+  
+  .summary-item {
+    align-items: flex-start;
+  }
+  
+  .history-filters-fullscreen {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

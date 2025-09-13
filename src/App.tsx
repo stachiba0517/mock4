@@ -173,6 +173,7 @@ const App: React.FC = () => {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showCustomerDetail, setShowCustomerDetail] = useState(false);
+  const [showCustomerDetailPage, setShowCustomerDetailPage] = useState(false);
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({
     companyName: '',
     contactName: '',
@@ -351,10 +352,16 @@ const App: React.FC = () => {
     setShowCustomerModal(true);
   };
 
-  // 顧客詳細表示ハンドラー
+  // 顧客詳細表示ハンドラー（別ページ表示）
   const handleViewCustomerDetail = (customer: Customer) => {
     setSelectedCustomer(customer);
-    setShowCustomerDetail(true);
+    setShowCustomerDetailPage(true);
+  };
+
+  // 顧客詳細ページから戻る
+  const handleBackToCustomers = () => {
+    setShowCustomerDetailPage(false);
+    setSelectedCustomer(null);
   };
 
   // 営業案件追加ハンドラー
@@ -549,7 +556,214 @@ const App: React.FC = () => {
       </header>
 
       <main className="main-content">
-        {activeTab === 'dashboard' && (
+        {showCustomerDetailPage && selectedCustomer ? (
+          <div className="customer-detail-page">
+            <div className="detail-page-header">
+              <div className="header-left">
+                <button className="back-btn" onClick={handleBackToCustomers}>
+                  ← 顧客管理に戻る
+                </button>
+                <div className="page-title">
+                  <h2>📋 顧客詳細情報</h2>
+                  <p>{selectedCustomer.companyName} の詳細情報と取引履歴</p>
+                </div>
+              </div>
+              <div className="header-actions">
+                <button className="btn-primary" onClick={() => {
+                  setShowCustomerDetailPage(false);
+                  handleEditCustomer(selectedCustomer);
+                }}>
+                  編集する
+                </button>
+              </div>
+            </div>
+
+            <div className="detail-page-content">
+              {/* 顧客基礎情報セクション */}
+              <div className="customer-info-fullscreen">
+                <h3>📋 基礎情報</h3>
+                <div className="info-grid-fullscreen">
+                  <div className="info-section">
+                    <h4>🏢 企業情報</h4>
+                    <div className="info-table">
+                      <div className="info-row">
+                        <span className="info-label">会社名</span>
+                        <span className="info-value">{selectedCustomer.companyName}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">業界</span>
+                        <span className="info-value">{selectedCustomer.industry}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">企業規模</span>
+                        <span className="info-value">{selectedCustomer.companySize}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">年間売上</span>
+                        <span className="info-value">¥{selectedCustomer.revenue.toLocaleString()}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">住所</span>
+                        <span className="info-value">{selectedCustomer.address}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">ステータス</span>
+                        <span className={`status-badge status-${selectedCustomer.status.replace(/\s+/g, '-')}`}>
+                          {selectedCustomer.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="info-section">
+                    <h4>👤 担当者情報</h4>
+                    <div className="info-table">
+                      <div className="info-row">
+                        <span className="info-label">担当者名</span>
+                        <span className="info-value">{selectedCustomer.contactName}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">役職</span>
+                        <span className="info-value">{selectedCustomer.position}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">メールアドレス</span>
+                        <span className="info-value">
+                          <a href={`mailto:${selectedCustomer.email}`}>{selectedCustomer.email}</a>
+                        </span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">電話番号</span>
+                        <span className="info-value">
+                          <a href={`tel:${selectedCustomer.phone}`}>{selectedCustomer.phone}</a>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="info-section">
+                    <h4>📊 営業情報</h4>
+                    <div className="info-table">
+                      <div className="info-row">
+                        <span className="info-label">担当営業</span>
+                        <span className="info-value">{selectedCustomer.assignedSales}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">登録日</span>
+                        <span className="info-value">{selectedCustomer.createdDate}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">最終コンタクト</span>
+                        <span className="info-value">{selectedCustomer.lastContact}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedCustomer.notes && (
+                  <div className="notes-section">
+                    <h4>📝 備考・特記事項</h4>
+                    <div className="notes-content">
+                      <p>{selectedCustomer.notes}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 取引履歴セクション */}
+              <div className="transaction-history-fullscreen">
+                <div className="history-header">
+                  <h3>📊 取引履歴・コミュニケーション履歴</h3>
+                  <div className="history-summary">
+                    <div className="summary-item">
+                      <span className="summary-label">総コミュニケーション数</span>
+                      <span className="summary-value">
+                        {communications.filter(comm => comm.customerId === selectedCustomer.id).length}件
+                      </span>
+                    </div>
+                    <div className="summary-item">
+                      <span className="summary-label">最終コンタクト</span>
+                      <span className="summary-value">{selectedCustomer.lastContact}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="history-filters-fullscreen">
+                  <select className="filter-select">
+                    <option>全ての種類</option>
+                    <option>電話</option>
+                    <option>メール</option>
+                    <option>会議</option>
+                    <option>訪問</option>
+                  </select>
+                  <input type="date" className="date-input" />
+                  <span>〜</span>
+                  <input type="date" className="date-input" />
+                  <button className="btn-secondary">フィルター適用</button>
+                </div>
+
+                <div className="history-timeline-fullscreen">
+                  {communications
+                    .filter(comm => comm.customerId === selectedCustomer.id)
+                    .sort((a, b) => new Date(b.date + ' ' + b.time).getTime() - new Date(a.date + ' ' + a.time).getTime())
+                    .map((comm) => (
+                      <div key={comm.id} className="timeline-item-fullscreen">
+                        <div className="timeline-date-column">
+                          <div className="timeline-date">{comm.date}</div>
+                          <div className="timeline-time">{comm.time}</div>
+                        </div>
+                        <div className="timeline-icon-column">
+                          <div className="timeline-icon-large">
+                            {comm.type === '電話' && '📞'}
+                            {comm.type === 'メール' && '📧'}
+                            {comm.type === '会議' && '🤝'}
+                            {comm.type === '訪問' && '🏢'}
+                          </div>
+                          <div className="timeline-type">{comm.type}</div>
+                        </div>
+                        <div className="timeline-content-column">
+                          <div className="timeline-header-fullscreen">
+                            <h4>{comm.subject}</h4>
+                            <span className={`priority-badge priority-${comm.priority}`}>
+                              {comm.priority}
+                            </span>
+                          </div>
+                          <div className="timeline-summary-fullscreen">
+                            <p>{comm.summary}</p>
+                          </div>
+                          <div className="timeline-details">
+                            {comm.participants.length > 0 && (
+                              <div className="detail-item">
+                                <strong>参加者:</strong> {comm.participants.join(', ')}
+                              </div>
+                            )}
+                            {comm.duration && (
+                              <div className="detail-item">
+                                <strong>所要時間:</strong> {comm.duration}分
+                              </div>
+                            )}
+                            {comm.nextAction && (
+                              <div className="detail-item">
+                                <strong>次のアクション:</strong> {comm.nextAction}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                  {communications.filter(comm => comm.customerId === selectedCustomer.id).length === 0 && (
+                    <div className="no-history-fullscreen">
+                      <div className="no-history-icon">📭</div>
+                      <h4>まだコミュニケーション履歴がありません</h4>
+                      <p>この顧客との最初のコンタクトを記録しましょう。</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'dashboard' && (
           <div className="dashboard">
             <div className="dashboard-header">
               <h2>📊 CRMダッシュボード</h2>
@@ -557,98 +771,196 @@ const App: React.FC = () => {
             </div>
 
             {analytics && (
-              <div className="dashboard-grid">
-                <div className="kpi-cards">
-                  <div className="kpi-card">
-                    <h3>今月の売上目標</h3>
-                    <div className="kpi-value">¥{analytics.salesForecast.currentMonth.target.toLocaleString()}</div>
-                    <div className="kpi-progress">
-                      <div className="progress-bar">
-                        <div className="progress-fill" style={{width: `${analytics.salesForecast.currentMonth.progress}%`}}></div>
+              <div className="dashboard-layout">
+                {/* チーム全体情報セクション */}
+                <div className="team-overview-section">
+                  <div className="section-header">
+                    <h3>🏢 チーム全体の状況</h3>
+                    <p>今月の目標達成状況と営業チーム全体の実績</p>
+                  </div>
+
+                  {/* 今月の目標・実績 */}
+                  <div className="team-kpi-cards">
+                    <div className="team-kpi-card primary">
+                      <div className="kpi-header">
+                        <h4>📈 今月の売上目標</h4>
+                        <span className="kpi-period">2024年3月</span>
                       </div>
-                      <span>{analytics.salesForecast.currentMonth.progress}% 達成</span>
-                </div>
-              </div>
-                  
-                  <div className="kpi-card">
-                    <h3>パイプライン総額</h3>
-                    <div className="kpi-value">¥{analytics.pipelineAnalysis.totalValue.toLocaleString()}</div>
-                    <div className="kpi-sub">加重値: ¥{analytics.pipelineAnalysis.weightedValue.toLocaleString()}</div>
-                </div>
-                  
-                  <div className="kpi-card">
-                    <h3>アクティブ顧客</h3>
-                    <div className="kpi-value">{analytics.customerAnalysis.activeCustomers}</div>
-                    <div className="kpi-sub">総顧客数: {analytics.customerAnalysis.totalCustomers}</div>
-              </div>
-                  
-                  <div className="kpi-card">
-                    <h3>今月のタスク</h3>
-                    <div className="kpi-value">{tasks.filter(t => t.status !== '完了').length}</div>
-                    <div className="kpi-sub">完了: {tasks.filter(t => t.status === '完了').length}件</div>
-                </div>
-              </div>
-
-                <div className="pipeline-section">
-                  <h3>🎯 営業パイプライン</h3>
-                  <div className="pipeline-stages">
-                    {analytics.pipelineAnalysis.stageDistribution.map((stage, index) => (
-                      <div key={index} className="pipeline-stage">
-                        <div className="stage-header">
-                          <h4>{stage.stage}</h4>
-                          <span className="stage-count">{stage.count}件</span>
+                      <div className="kpi-main">
+                        <div className="kpi-value">¥{analytics.salesForecast.currentMonth.target.toLocaleString()}</div>
+                        <div className="kpi-achieved">実績: ¥{analytics.salesForecast.currentMonth.achieved.toLocaleString()}</div>
+                      </div>
+                      <div className="kpi-progress">
+                        <div className="progress-bar large">
+                          <div className="progress-fill" style={{width: `${analytics.salesForecast.currentMonth.progress}%`}}></div>
                         </div>
-                        <div className="stage-value">¥{stage.value.toLocaleString()}</div>
-                        <div className="stage-probability">{stage.probability}% 確度</div>
-                </div>
-                    ))}
-              </div>
-            </div>
-
-                <div className="team-performance">
-                  <h3>👥 営業チーム実績</h3>
-                  <div className="performance-list">
-                    {analytics.salesPerformance.salesTeam.map((member, index) => (
-                      <div key={index} className="performance-item">
-                        <div className="member-info">
-                          <h4>{member.name}</h4>
-                          <div className="member-stats">
-                            <span>目標: ¥{member.target.toLocaleString()}</span>
-                            <span>実績: ¥{member.achieved.toLocaleString()}</span>
-                            <span>達成率: {member.progress}%</span>
-                </div>
-                </div>
-                        <div className="member-progress">
-                          <div className="progress-bar">
-                            <div className="progress-fill" style={{width: `${member.progress}%`}}></div>
-                </div>
-              </div>
-            </div>
-                    ))}
-              </div>
-            </div>
-
-                <div className="recent-activities">
-                  <h3>📝 最近の活動</h3>
-                  <div className="activity-list">
-                    {communications.slice(0, 5).map((comm, index) => (
-                      <div key={index} className="activity-item">
-                        <div className="activity-icon">
-                          {comm.type === '電話' && '📞'}
-                          {comm.type === 'メール' && '📧'}
-                          {comm.type === '会議' && '🤝'}
-                          {comm.type === '訪問' && '🏢'}
-                  </div>
-                        <div className="activity-content">
-                          <h4>{comm.subject}</h4>
-                          <p>{comm.customerName} - {comm.date}</p>
+                        <div className="progress-info">
+                          <span className="progress-percentage">{analytics.salesForecast.currentMonth.progress}% 達成</span>
+                          <span className="progress-remaining">残り: ¥{analytics.salesForecast.currentMonth.remaining.toLocaleString()}</span>
+                        </div>
+                      </div>
                     </div>
-                        <div className={`priority-badge priority-${comm.priority}`}>
-                          {comm.priority}
+
+                    <div className="team-kpi-card">
+                      <h4>🎯 パイプライン総額</h4>
+                      <div className="kpi-value">¥{analytics.pipelineAnalysis.totalValue.toLocaleString()}</div>
+                      <div className="kpi-sub">加重値: ¥{analytics.pipelineAnalysis.weightedValue.toLocaleString()}</div>
+                      <div className="kpi-sub">平均案件サイズ: ¥{analytics.pipelineAnalysis.averageDealSize.toLocaleString()}</div>
+                    </div>
+
+                    <div className="team-kpi-card">
+                      <h4>👥 顧客・活動状況</h4>
+                      <div className="kpi-grid">
+                        <div className="kpi-item">
+                          <span className="kpi-label">アクティブ顧客</span>
+                          <span className="kpi-number">{analytics.customerAnalysis.activeCustomers}</span>
+                        </div>
+                        <div className="kpi-item">
+                          <span className="kpi-label">今月新規</span>
+                          <span className="kpi-number">{analytics.customerAnalysis.newCustomersThisMonth}</span>
+                        </div>
+                        <div className="kpi-item">
+                          <span className="kpi-label">総顧客数</span>
+                          <span className="kpi-number">{analytics.customerAnalysis.totalCustomers}</span>
+                        </div>
+                        <div className="kpi-item">
+                          <span className="kpi-label">継続率</span>
+                          <span className="kpi-number">{analytics.customerAnalysis.customerRetentionRate}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 営業チーム実績 */}
+                  <div className="team-performance-section">
+                    <h4>👥 営業チーム実績ランキング</h4>
+                    <div className="team-performance-grid">
+                      {analytics.salesPerformance.salesTeam
+                        .sort((a, b) => b.progress - a.progress)
+                        .map((member, index) => (
+                          <div key={index} className={`team-member-card ${index === 0 ? 'top-performer' : ''}`}>
+                            <div className="member-rank">
+                              {index === 0 && '🏆'}
+                              {index === 1 && '🥈'}
+                              {index === 2 && '🥉'}
+                              {index > 2 && `${index + 1}位`}
+                            </div>
+                            <div className="member-info">
+                              <h5>{member.name}</h5>
+                              <div className="member-stats">
+                                <div className="stat-row">
+                                  <span>目標: ¥{member.target.toLocaleString()}</span>
+                                  <span className="achievement-rate">{member.progress}%</span>
+                                </div>
+                                <div className="stat-row">
+                                  <span>実績: ¥{member.achieved.toLocaleString()}</span>
+                                  <span>{member.deals}件</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="member-progress">
+                              <div className="progress-bar">
+                                <div className="progress-fill" style={{width: `${member.progress}%`}}></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {/* 個別情報セクション */}
+                <div className="individual-section">
+                  <div className="section-header">
+                    <h3>👤 個人の活動状況</h3>
+                    <p>あなたの目標達成状況と最近の活動履歴</p>
+                  </div>
+
+                  <div className="individual-content">
+                    {/* 個人目標・実績 */}
+                    <div className="individual-performance">
+                      <h4>📊 あなたの実績 - 佐藤 花子</h4>
+                      <div className="individual-kpi-cards">
+                        <div className="individual-kpi-card">
+                          <h5>今月の目標</h5>
+                          <div className="kpi-value">¥8,000,000</div>
+                          <div className="kpi-progress">
+                            <div className="progress-bar">
+                              <div className="progress-fill" style={{width: '75%'}}></div>
+                            </div>
+                            <span>75% 達成 (¥6,000,000)</span>
+                          </div>
+                        </div>
+                        
+                        <div className="individual-kpi-card">
+                          <h5>今月の案件数</h5>
+                          <div className="kpi-value">12件</div>
+                          <div className="kpi-sub">目標: 15件 (80%達成)</div>
+                        </div>
+                        
+                        <div className="individual-kpi-card">
+                          <h5>平均案件サイズ</h5>
+                          <div className="kpi-value">¥500,000</div>
+                          <div className="kpi-sub">前月比: +15%</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 直近の活動履歴 */}
+                    <div className="recent-activities">
+                      <h4>📝 直近の活動履歴</h4>
+                      <div className="activity-timeline">
+                        {communications.slice(0, 8).map((comm, index) => (
+                          <div key={index} className="activity-timeline-item">
+                            <div className="activity-time">
+                              <span className="activity-date">{comm.date}</span>
+                              <span className="activity-hour">{comm.time}</span>
+                            </div>
+                            <div className="activity-icon">
+                              {comm.type === '電話' && '📞'}
+                              {comm.type === 'メール' && '📧'}
+                              {comm.type === '会議' && '🤝'}
+                              {comm.type === '訪問' && '🏢'}
+                            </div>
+                            <div className="activity-content">
+                              <h6>{comm.subject}</h6>
+                              <p>{comm.customerName}</p>
+                              <div className="activity-meta">
+                                <span className={`priority-badge priority-${comm.priority}`}>
+                                  {comm.priority}
+                                </span>
+                                {comm.nextAction && (
+                                  <span className="next-action">次: {comm.nextAction}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 今日のタスク */}
+                    <div className="today-tasks">
+                      <h4>✅ 今日のタスク</h4>
+                      <div className="task-list">
+                        {tasks.filter(t => t.status !== '完了').slice(0, 5).map((task, index) => (
+                          <div key={index} className="task-item">
+                            <div className="task-priority">
+                              <span className={`priority-dot priority-${task.priority}`}></span>
+                            </div>
+                            <div className="task-content">
+                              <h6>{task.title}</h6>
+                              <p>{task.customerName && `${task.customerName} - `}{task.description}</p>
+                              <div className="task-meta">
+                                <span className="task-due">期限: {task.dueDate}</span>
+                                <span className={`task-status status-${task.status}`}>{task.status}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -713,7 +1025,6 @@ const App: React.FC = () => {
                       <td>
                         <button className="btn-small" onClick={() => handleViewCustomerDetail(customer)}>詳細</button>
                         <button className="btn-small" onClick={() => handleEditCustomer(customer)}>編集</button>
-                        <button className="btn-small btn-secondary">履歴</button>
                       </td>
                     </tr>
                   ))}
