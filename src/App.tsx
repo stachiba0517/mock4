@@ -171,6 +171,8 @@ const App: React.FC = () => {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [showCustomerDetail, setShowCustomerDetail] = useState(false);
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({
     companyName: '',
     contactName: '',
@@ -347,6 +349,12 @@ const App: React.FC = () => {
       notes: customer.notes
     });
     setShowCustomerModal(true);
+  };
+
+  // 顧客詳細表示ハンドラー
+  const handleViewCustomerDetail = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setShowCustomerDetail(true);
   };
 
   // 営業案件追加ハンドラー
@@ -703,6 +711,7 @@ const App: React.FC = () => {
                       <td>{customer.assignedSales}</td>
                       <td>{customer.lastContact}</td>
                       <td>
+                        <button className="btn-small" onClick={() => handleViewCustomerDetail(customer)}>詳細</button>
                         <button className="btn-small" onClick={() => handleEditCustomer(customer)}>編集</button>
                         <button className="btn-small btn-secondary">履歴</button>
                       </td>
@@ -1571,6 +1580,178 @@ const App: React.FC = () => {
               </button>
               <button className="btn-primary" onClick={handleAddCalendarEvent}>
                 予定を追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 顧客詳細モーダル */}
+      {showCustomerDetail && selectedCustomer && (
+        <div className="modal-overlay" onClick={() => setShowCustomerDetail(false)}>
+          <div className="modal-content customer-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>顧客詳細情報</h3>
+              <button className="modal-close" onClick={() => setShowCustomerDetail(false)}>×</button>
+            </div>
+            
+            <div className="modal-body customer-detail-body">
+              {/* 顧客基礎情報セクション */}
+              <div className="customer-info-section">
+                <h4>📋 基礎情報</h4>
+                <div className="customer-info-grid">
+                  <div className="info-card">
+                    <div className="info-header">
+                      <h5>{selectedCustomer.companyName}</h5>
+                      <span className={`status-badge status-${selectedCustomer.status.replace(/\s+/g, '-')}`}>
+                        {selectedCustomer.status}
+                      </span>
+                    </div>
+                    <div className="info-details">
+                      <div className="info-row">
+                        <span className="info-label">担当者:</span>
+                        <span className="info-value">{selectedCustomer.contactName}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">役職:</span>
+                        <span className="info-value">{selectedCustomer.position}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">メール:</span>
+                        <span className="info-value">{selectedCustomer.email}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">電話:</span>
+                        <span className="info-value">{selectedCustomer.phone}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="info-card">
+                    <h6>🏢 企業情報</h6>
+                    <div className="info-details">
+                      <div className="info-row">
+                        <span className="info-label">業界:</span>
+                        <span className="info-value">{selectedCustomer.industry}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">企業規模:</span>
+                        <span className="info-value">{selectedCustomer.companySize}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">年間売上:</span>
+                        <span className="info-value">¥{selectedCustomer.revenue.toLocaleString()}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">住所:</span>
+                        <span className="info-value">{selectedCustomer.address}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="info-card">
+                    <h6>👤 営業情報</h6>
+                    <div className="info-details">
+                      <div className="info-row">
+                        <span className="info-label">担当営業:</span>
+                        <span className="info-value">{selectedCustomer.assignedSales}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">登録日:</span>
+                        <span className="info-value">{selectedCustomer.createdDate}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">最終コンタクト:</span>
+                        <span className="info-value">{selectedCustomer.lastContact}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {selectedCustomer.notes && (
+                  <div className="customer-notes">
+                    <h6>📝 備考</h6>
+                    <p>{selectedCustomer.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* 取引履歴セクション */}
+              <div className="transaction-history-section">
+                <h4>📊 取引履歴・コミュニケーション履歴</h4>
+                <div className="history-filters">
+                  <select className="filter-select">
+                    <option>全ての種類</option>
+                    <option>電話</option>
+                    <option>メール</option>
+                    <option>会議</option>
+                    <option>訪問</option>
+                  </select>
+                  <input type="date" className="date-input" />
+                  <span>〜</span>
+                  <input type="date" className="date-input" />
+                </div>
+                
+                <div className="history-timeline">
+                  {communications
+                    .filter(comm => comm.customerId === selectedCustomer.id)
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map((comm) => (
+                      <div key={comm.id} className="timeline-item">
+                        <div className="timeline-icon">
+                          {comm.type === '電話' && '📞'}
+                          {comm.type === 'メール' && '📧'}
+                          {comm.type === '会議' && '🤝'}
+                          {comm.type === '訪問' && '🏢'}
+                        </div>
+                        <div className="timeline-content">
+                          <div className="timeline-header">
+                            <h6>{comm.subject}</h6>
+                            <div className="timeline-meta">
+                              <span className="timeline-date">{comm.date} {comm.time}</span>
+                              <span className={`priority-badge priority-${comm.priority}`}>
+                                {comm.priority}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="timeline-summary">{comm.summary}</p>
+                          {comm.participants.length > 0 && (
+                            <div className="timeline-participants">
+                              <strong>参加者:</strong> {comm.participants.join(', ')}
+                            </div>
+                          )}
+                          {comm.nextAction && (
+                            <div className="timeline-next-action">
+                              <strong>次のアクション:</strong> {comm.nextAction}
+                            </div>
+                          )}
+                          {comm.duration && (
+                            <div className="timeline-duration">
+                              <strong>時間:</strong> {comm.duration}分
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  
+                  {communications.filter(comm => comm.customerId === selectedCustomer.id).length === 0 && (
+                    <div className="no-history">
+                      <p>まだコミュニケーション履歴がありません。</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowCustomerDetail(false)}>
+                閉じる
+              </button>
+              <button className="btn-primary" onClick={() => {
+                setShowCustomerDetail(false);
+                handleEditCustomer(selectedCustomer);
+              }}>
+                編集する
               </button>
             </div>
           </div>
