@@ -170,6 +170,7 @@ const App: React.FC = () => {
   const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({
     companyName: '',
     contactName: '',
@@ -252,33 +253,58 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
-  // 顧客追加ハンドラー
+  // 顧客追加・更新ハンドラー
   const handleAddCustomer = () => {
     if (!newCustomer.companyName || !newCustomer.contactName || !newCustomer.email) {
       alert('必須項目を入力してください。');
       return;
     }
 
-    const customer: Customer = {
-      id: Math.max(...customers.map(c => c.id), 0) + 1,
-      companyName: newCustomer.companyName || '',
-      contactName: newCustomer.contactName || '',
-      position: newCustomer.position || '',
-      email: newCustomer.email || '',
-      phone: newCustomer.phone || '',
-      address: newCustomer.address || '',
-      industry: newCustomer.industry || '',
-      companySize: newCustomer.companySize || '',
-      revenue: newCustomer.revenue || 0,
-      status: newCustomer.status || '見込み客',
-      assignedSales: newCustomer.assignedSales || '',
-      createdDate: new Date().toISOString().split('T')[0],
-      lastContact: new Date().toISOString().split('T')[0],
-      notes: newCustomer.notes || ''
-    };
+    if (editingCustomer) {
+      // 既存顧客の更新
+      const updatedCustomer: Customer = {
+        ...editingCustomer,
+        companyName: newCustomer.companyName || '',
+        contactName: newCustomer.contactName || '',
+        position: newCustomer.position || '',
+        email: newCustomer.email || '',
+        phone: newCustomer.phone || '',
+        address: newCustomer.address || '',
+        industry: newCustomer.industry || '',
+        companySize: newCustomer.companySize || '',
+        revenue: newCustomer.revenue || 0,
+        status: newCustomer.status || '見込み客',
+        assignedSales: newCustomer.assignedSales || '',
+        lastContact: new Date().toISOString().split('T')[0],
+        notes: newCustomer.notes || ''
+      };
 
-    setCustomers([...customers, customer]);
+      setCustomers(customers.map(c => c.id === editingCustomer.id ? updatedCustomer : c));
+    } else {
+      // 新規顧客の追加
+      const customer: Customer = {
+        id: Math.max(...customers.map(c => c.id), 0) + 1,
+        companyName: newCustomer.companyName || '',
+        contactName: newCustomer.contactName || '',
+        position: newCustomer.position || '',
+        email: newCustomer.email || '',
+        phone: newCustomer.phone || '',
+        address: newCustomer.address || '',
+        industry: newCustomer.industry || '',
+        companySize: newCustomer.companySize || '',
+        revenue: newCustomer.revenue || 0,
+        status: newCustomer.status || '見込み客',
+        assignedSales: newCustomer.assignedSales || '',
+        createdDate: new Date().toISOString().split('T')[0],
+        lastContact: new Date().toISOString().split('T')[0],
+        notes: newCustomer.notes || ''
+      };
+
+      setCustomers([...customers, customer]);
+    }
+
     setShowCustomerModal(false);
+    setEditingCustomer(null);
     setNewCustomer({
       companyName: '',
       contactName: '',
@@ -301,6 +327,26 @@ const App: React.FC = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  // 顧客編集ハンドラー
+  const handleEditCustomer = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setNewCustomer({
+      companyName: customer.companyName,
+      contactName: customer.contactName,
+      position: customer.position,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      industry: customer.industry,
+      companySize: customer.companySize,
+      revenue: customer.revenue,
+      status: customer.status,
+      assignedSales: customer.assignedSales,
+      notes: customer.notes
+    });
+    setShowCustomerModal(true);
   };
 
   // 営業案件追加ハンドラー
@@ -657,7 +703,7 @@ const App: React.FC = () => {
                       <td>{customer.assignedSales}</td>
                       <td>{customer.lastContact}</td>
                       <td>
-                        <button className="btn-small">編集</button>
+                        <button className="btn-small" onClick={() => handleEditCustomer(customer)}>編集</button>
                         <button className="btn-small btn-secondary">履歴</button>
                       </td>
                     </tr>
@@ -999,11 +1045,45 @@ const App: React.FC = () => {
 
       {/* 新規顧客追加モーダル */}
       {showCustomerModal && (
-        <div className="modal-overlay" onClick={() => setShowCustomerModal(false)}>
+        <div className="modal-overlay" onClick={() => {
+          setShowCustomerModal(false);
+          setEditingCustomer(null);
+          setNewCustomer({
+            companyName: '',
+            contactName: '',
+            position: '',
+            email: '',
+            phone: '',
+            address: '',
+            industry: '',
+            companySize: '',
+            revenue: 0,
+            status: '見込み客',
+            assignedSales: '',
+            notes: ''
+          });
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>新規顧客追加</h3>
-              <button className="modal-close" onClick={() => setShowCustomerModal(false)}>×</button>
+              <h3>{editingCustomer ? '顧客情報編集' : '新規顧客追加'}</h3>
+              <button className="modal-close" onClick={() => {
+                setShowCustomerModal(false);
+                setEditingCustomer(null);
+                setNewCustomer({
+                  companyName: '',
+                  contactName: '',
+                  position: '',
+                  email: '',
+                  phone: '',
+                  address: '',
+                  industry: '',
+                  companySize: '',
+                  revenue: 0,
+                  status: '見込み客',
+                  assignedSales: '',
+                  notes: ''
+                });
+              }}>×</button>
             </div>
             
             <div className="modal-body">
@@ -1149,11 +1229,28 @@ const App: React.FC = () => {
             </div>
             
             <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setShowCustomerModal(false)}>
+              <button className="btn-secondary" onClick={() => {
+                setShowCustomerModal(false);
+                setEditingCustomer(null);
+                setNewCustomer({
+                  companyName: '',
+                  contactName: '',
+                  position: '',
+                  email: '',
+                  phone: '',
+                  address: '',
+                  industry: '',
+                  companySize: '',
+                  revenue: 0,
+                  status: '見込み客',
+                  assignedSales: '',
+                  notes: ''
+                });
+              }}>
                 キャンセル
               </button>
               <button className="btn-primary" onClick={handleAddCustomer}>
-                顧客を追加
+                {editingCustomer ? '顧客を更新' : '顧客を追加'}
               </button>
             </div>
           </div>
